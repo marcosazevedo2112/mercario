@@ -1,4 +1,4 @@
-import Request from 'express';
+import {Request} from 'express';
 
 export function getTenantId(req: Request) {
   if (!req.session.user) {
