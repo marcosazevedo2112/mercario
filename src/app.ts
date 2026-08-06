@@ -15,6 +15,10 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dias
       httpOnly: true,
+      domain: process.env.COOKIE_DOMAIN || 'localhost', // Para desenvolvimento
+      path: '/',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
     },
   }),
 );

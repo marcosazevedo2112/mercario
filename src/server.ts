@@ -5,7 +5,7 @@ import env from './config/env';
 async function bootstrap() {
   try {
     await sequelize.authenticate();
-    //await sequelize.sync();
+    await sequelize.sync();
 
     console.log('Database connected');
 
