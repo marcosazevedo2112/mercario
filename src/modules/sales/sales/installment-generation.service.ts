@@ -15,60 +15,33 @@ interface GeneratedInstallment {
 }
 
 const InstallmentGenerationService = {
-  generate: (
-    total: Money,
-    paymentPlan: PaymentPlan,
-  ): GeneratedInstallment[] => {
-    const totalCents = total.cents;
-    const installments = paymentPlan.installments;
-
-    const baseAmount = Math.floor(totalCents / installments);
-    const remainder = totalCents % installments;
-
-    const generated: GeneratedInstallment[] = [];
-
-    for (let index = 0; index < installments; index++) {
+  generate: (total: Money, paymentPlan: PaymentPlan): GeneratedInstallment[] => {
+    const baseAmount = Math.floor(total.cents / paymentPlan.installments);
+    const remainder = total.cents % paymentPlan.installments;
+    return Array.from({length: paymentPlan.installments}, (_, index) => {
       const number = index + 1;
-
-      const amountCents =
-        number === installments ? baseAmount + remainder : baseAmount;
-
-      generated.push({
+      return {
         number,
-        amountCents,
+        amountCents: number === paymentPlan.installments ? baseAmount + remainder : baseAmount,
         paidAmountCents: 0,
-        dueDate: getDueDate(
-          paymentPlan.initialDueDate,
-          number,
-          paymentPlan.modality,
-        ),
+        dueDate: getDueDate(paymentPlan.initialDueDate, number, paymentPlan.modality),
         status: InstallmentStatus.PENDING,
         paidAt: null,
         settlementId: null,
         notes: null,
-      });
-    }
-
-    return generated;
+      };
+    });
   },
 };
 
-function getDueDate(
-  initialDueDate: Date,
-  installmentNumber: number,
-  modality: PaymentModality,
-): Date {
+function getDueDate(initialDueDate: Date, installmentNumber: number, modality: PaymentModality): Date {
   const date = new Date(initialDueDate);
-
   switch (modality) {
     case PaymentModality.ONCE:
       return date;
-
     case PaymentModality.WEEKLY:
-      date.setDate(date.getDate() + (installmentNumber - 1) * 7);
-
+      date.setUTCDate(date.getUTCDate() + (installmentNumber - 1) * 7);
       return date;
-
     case PaymentModality.MONTHLY:
       return addMonths(date, installmentNumber - 1);
   }
@@ -76,23 +49,13 @@ function getDueDate(
 
 function addMonths(date: Date, months: number): Date {
   const result = new Date(date);
-
-  const originalDay = result.getDate();
-
-  result.setDate(1);
-  result.setMonth(result.getMonth() + months);
-
-  const lastDayOfMonth = new Date(
-    result.getFullYear(),
-    result.getMonth() + 1,
-    0,
-  ).getDate();
-
-  result.setDate(Math.min(originalDay, lastDayOfMonth));
-
+  const originalDay = result.getUTCDate();
+  result.setUTCDate(1);
+  result.setUTCMonth(result.getUTCMonth() + months);
+  const lastDayOfMonth = new Date(Date.UTC(result.getUTCFullYear(), result.getUTCMonth() + 1, 0)).getUTCDate();
+  result.setUTCDate(Math.min(originalDay, lastDayOfMonth));
   return result;
 }
 
 export default InstallmentGenerationService;
-
 export type {GeneratedInstallment};
