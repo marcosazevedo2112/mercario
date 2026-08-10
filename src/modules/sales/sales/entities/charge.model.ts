@@ -23,6 +23,7 @@ Charge.init(
     triggeredBy: {type: DataTypes.ENUM(...Object.values(ChargeTrigger)), allowNull: false},
     channel: {type: DataTypes.ENUM(...Object.values(ChargeChannel)), allowNull: false},
     message: {type: DataTypes.TEXT, allowNull: false},
+    createdAt: {type: DataTypes.DATE, allowNull: false},
   },
   {
     sequelize,
