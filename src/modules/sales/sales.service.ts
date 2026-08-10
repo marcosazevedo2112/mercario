@@ -3,14 +3,13 @@ import {AppError} from '../../errors/appError';
 import Customer from '../customers/customer.model';
 import Product from '../products/product.model';
 import SaleRepository, {CreateSaleData} from './sales/sale.repository';
-import InstallmentGenerationService from './sales/installment-generation.service';
-import {Money} from './sales/value-objects/money';
 import {PaymentPlan} from './sales/value-objects/payment-plan';
 import {SaleStatus} from './sales/enums/sale-status';
 import {InstallmentStatus} from './sales/enums/installment-status';
 import {CreateSaleDTO} from './schemas/create.sales';
 import SettlementService from './sales/settlement.service';
 import {PaymentMethod} from './sales/enums/payment-method';
+import {SaleAggregate} from './sales/sale.aggregate';
 
 const SalesService = {
   create: async (data: CreateSaleDTO, tenantId: number, createdBy: number) => {
@@ -23,24 +22,46 @@ const SalesService = {
     if (products.length !== uniqueProductIds.length) throw new AppError('Um ou mais produtos não foram encontrados', 404);
 
     const productMap = new Map(products.map(product => [product.id, product]));
-    const items = data.items.map(item => {
+    const sale = new SaleAggregate(tenantId, customer.id, createdBy, data.notes ?? null);
+
+    for (const item of data.items) {
       const product = productMap.get(item.productId);
       if (!product) throw new AppError(`Produto ${item.productId} não encontrado`, 404);
-      const subtotalCents = product.priceCents * item.quantity;
-      return {tenantId, productId: product.id, productName: product.name, quantity: item.quantity, unitPriceCents: product.priceCents, subtotalCents};
-    });
+      sale.addItem({
+        tenantId,
+        productId: product.id,
+        productName: product.name,
+        quantity: item.quantity,
+        unitPriceCents: product.priceCents,
+        subtotalCents: product.priceCents * item.quantity,
+      });
+    }
 
-    const subtotalCents = items.reduce((total, item) => total + item.subtotalCents, 0);
-    if (data.discountCents > subtotalCents) throw new AppError('O desconto não pode ser maior que o subtotal', 400);
-    const totalCents = subtotalCents - data.discountCents;
-    const paymentPlan = PaymentPlan.create({initialDueDate: new Date(data.paymentPlan.initialDueDate), installments: data.paymentPlan.installments, modality: data.paymentPlan.modality, paymentMethod: data.paymentPlan.paymentMethod});
-    const generatedInstallments = InstallmentGenerationService.generate(Money.fromCents(totalCents), paymentPlan);
+    sale.setDiscount(data.discountCents);
+    sale.setPaymentPlan(PaymentPlan.create({
+      initialDueDate: new Date(data.paymentPlan.initialDueDate),
+      installments: data.paymentPlan.installments,
+      modality: data.paymentPlan.modality,
+      paymentMethod: data.paymentPlan.paymentMethod,
+    }));
 
+    const confirmed = sale.confirm();
     const createData: CreateSaleData = {
-      sale: {tenantId, customerId: customer.id, subtotalCents, discountCents: data.discountCents, totalCents, paymentMethod: paymentPlan.paymentMethod, installments: paymentPlan.installments, initialDueDate: paymentPlan.initialDueDate, modality: paymentPlan.modality, notes: data.notes ?? null, status: SaleStatus.OPEN, createdBy, confirmedAt: new Date()},
-      items,
-      installments: generatedInstallments.map(installment => ({tenantId, number: installment.number, amountCents: installment.amountCents, paidAmountCents: 0, dueDate: installment.dueDate, status: InstallmentStatus.PENDING, paidAt: null, settlementId: null, notes: null})),
+      sale: confirmed.sale,
+      items: confirmed.items,
+      installments: confirmed.installments.map(installment => ({
+        tenantId,
+        number: installment.number,
+        amountCents: installment.amountCents,
+        paidAmountCents: installment.paidAmountCents,
+        dueDate: installment.dueDate,
+        status: InstallmentStatus.PENDING,
+        paidAt: null,
+        settlementId: null,
+        notes: null,
+      })),
     };
+
     return sequelize.transaction(transaction => SaleRepository.create(createData, transaction));
   },
 
@@ -74,8 +95,7 @@ const SalesService = {
     await sequelize.transaction(transaction => SaleRepository.registerPayment(installmentId, saleId, tenantId, paidAt, transaction));
   },
 
-  settle: async (saleId: number, tenantId: number, data: {discountCents: number; paymentMethod: PaymentMethod; settledBy: number | 'system'; notes?: string | null}) =>
-    SettlementService.settle(saleId, tenantId, data),
+  settle: async (saleId: number, tenantId: number, data: {discountCents: number; paymentMethod: PaymentMethod; settledBy: number | 'system'; notes?: string | null}) => SettlementService.settle(saleId, tenantId, data),
 };
 
 export default SalesService;
