@@ -29,6 +29,8 @@ Settlement.init(
     settledAt: {type: DataTypes.DATE, allowNull: false},
     settledBy: {type: DataTypes.STRING(20), allowNull: false},
     notes: {type: DataTypes.TEXT, allowNull: true},
+    createdAt: {type: DataTypes.DATE, allowNull: false},
+    updatedAt: {type: DataTypes.DATE, allowNull: false},
   },
   {
     sequelize,
