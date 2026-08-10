@@ -1,22 +1,11 @@
-import {Transaction} from 'sequelize';
+import {InferCreationAttributes, Transaction} from 'sequelize';
 import Settlement from './entities/settlement.model';
-import {PaymentMethod} from './enums/payment-method';
 
-interface CreateSettlementData {
-  saleId: number;
-  tenantId: number;
-  originalRemainingCents: number;
-  discountCents: number;
-  settledAmountCents: number;
-  paymentMethod: PaymentMethod;
-  settledAt: Date;
-  settledBy: number | 'system';
-  notes: string | null;
-}
+interface CreateSettlementData extends Omit<InferCreationAttributes<Settlement>, 'id' | 'createdAt' | 'updatedAt'> {}
 
 const SettlementRepository = {
   create: async (data: CreateSettlementData, transaction: Transaction) =>
-    Settlement.create(data as Parameters<typeof Settlement.create>[0], {transaction}),
+    Settlement.create(data, {transaction}),
   findBySaleId: async (saleId: number, tenantId: number, transaction?: Transaction) =>
     Settlement.findOne({where: {saleId, tenantId}, transaction}),
 };
