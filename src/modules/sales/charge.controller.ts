@@ -4,7 +4,8 @@ import {getTenantId} from '../shared/utils/getTenantId';
 import ChargeService from './sales/charge.service';
 import {createChargeSchema} from './schemas/charge.sales';
 
-const id = (value: string) => {
+const id = (value: string | string[]) => {
+  if (Array.isArray(value)) throw new AppError('Identificador inválido', 400);
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed <= 0) throw new AppError('Identificador inválido', 400);
   return parsed;
