@@ -1,18 +1,17 @@
-import {DataTypes, Model} from 'sequelize';
+import {CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model} from 'sequelize';
 import sequelize from '../../../../database/connection';
-
 import {ChargeChannel} from '../enums/charge-channel';
 import {ChargeTrigger} from '../enums/charge-trigger';
 
-class Charge extends Model {
-  declare id: number;
+class Charge extends Model<InferAttributes<Charge>, InferCreationAttributes<Charge>> {
+  declare id: CreationOptional<number>;
   declare installmentId: number;
   declare tenantId: number;
   declare sentBy: number | 'system';
   declare triggeredBy: ChargeTrigger;
   declare channel: ChargeChannel;
   declare message: string;
-  declare readonly createdAt: Date;
+  declare readonly createdAt: CreationOptional<Date>;
 }
 
 Charge.init(
