@@ -15,12 +15,10 @@ interface CreateSettlementData {
 }
 
 const SettlementRepository = {
-  create: async (data: CreateSettlementData, transaction: Transaction) => {
-    return Settlement.create(data, {transaction});
-  },
-  findBySaleId: async (saleId: number, tenantId: number, transaction?: Transaction) => {
-    return Settlement.findOne({where: {saleId, tenantId}, transaction});
-  },
+  create: async (data: CreateSettlementData, transaction: Transaction) =>
+    Settlement.create(data as Parameters<typeof Settlement.create>[0], {transaction}),
+  findBySaleId: async (saleId: number, tenantId: number, transaction?: Transaction) =>
+    Settlement.findOne({where: {saleId, tenantId}, transaction}),
 };
 
 export default SettlementRepository;
