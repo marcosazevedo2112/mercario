@@ -2,17 +2,24 @@ import {Op, Transaction} from 'sequelize';
 import Sale from './entities/sale.model';
 import SaleItem from './entities/sale-item.model';
 import Installment from './entities/installment.model';
+import Settlement from './entities/settlement.model';
 import {SaleStatus} from './enums/sale-status';
 import {InstallmentStatus} from './enums/installment-status';
 import {PaymentMethod} from './enums/payment-method';
 import {PaymentModality} from './enums/payment-modality';
 
-type SaleWithRelations = Sale & {items: SaleItem[]; installments: Installment[]};
+type SaleWithRelations = Sale & {items: SaleItem[]; installments: Installment[]; settlement?: Settlement | null};
 interface CreateSaleData {
   sale: {tenantId: number; customerId: number; subtotalCents: number; discountCents: number; totalCents: number; paymentMethod: PaymentMethod; installments: number; initialDueDate: Date; modality: PaymentModality; notes: string | null; status: SaleStatus; createdBy: number; confirmedAt: Date};
   items: Array<{tenantId: number; productId: number; productName: string; quantity: number; unitPriceCents: number; subtotalCents: number}>;
   installments: Array<{tenantId: number; number: number; amountCents: number; paidAmountCents: number; dueDate: Date; status: InstallmentStatus; paidAt: Date | null; settlementId: number | null; notes: string | null}>;
 }
+
+const includes = [
+  {model: SaleItem, as: 'items'},
+  {model: Installment, as: 'installments'},
+  {model: Settlement, as: 'settlement'},
+];
 
 const SaleRepository = {
   create: async (data: CreateSaleData, transaction: Transaction): Promise<Sale> => {
@@ -22,15 +29,19 @@ const SaleRepository = {
     return sale;
   },
 
-  findById: async (saleId: number, tenantId: number, transaction?: Transaction): Promise<SaleWithRelations | null> => Sale.findOne({where: {id: saleId, tenantId}, include: [{model: SaleItem, as: 'items'}, {model: Installment, as: 'installments'}], transaction}) as Promise<SaleWithRelations | null>,
+  findById: async (saleId: number, tenantId: number, transaction?: Transaction): Promise<SaleWithRelations | null> => Sale.findOne({where: {id: saleId, tenantId}, include: includes, transaction}) as Promise<SaleWithRelations | null>,
 
   findMany: async (tenantId: number, options: {page: number; limit: number; status?: SaleStatus; customerId?: number; search?: string}) => {
     const where: Record<string, unknown> = {tenantId};
     if (options.status) where.status = options.status;
     if (options.customerId) where.customerId = options.customerId;
-    if (options.search) where.id = {[Op.like]: `%${options.search}%`};
+    if (options.search) {
+      const saleId = Number(options.search);
+      if (Number.isInteger(saleId) && saleId > 0) where.id = {[Op.eq]: saleId};
+      else where.id = {[Op.eq]: -1};
+    }
     const offset = (options.page - 1) * options.limit;
-    const result = await Sale.findAndCountAll({where, limit: options.limit, offset, order: [['createdAt', 'DESC']], include: [{model: SaleItem, as: 'items'}, {model: Installment, as: 'installments'}]);
+    const result = await Sale.findAndCountAll({where, limit: options.limit, offset, order: [['createdAt', 'DESC']], include: includes, distinct: true});
     return {rows: result.rows as SaleWithRelations[], count: result.count};
   },
 
