@@ -5,7 +5,8 @@ import {getTenantId} from '../shared/utils/getTenantId';
 import {createSaleSchema, cancelSaleSchema, settleSaleSchema} from './schemas/create.sales';
 import {SaleStatus} from './sales/enums/sale-status';
 
-const parseId = (value: string) => {
+const parseId = (value: string | string[]) => {
+  if (Array.isArray(value)) throw new AppError('Identificador inválido', 400);
   const id = Number(value);
   if (!Number.isInteger(id) || id <= 0) throw new AppError('Identificador inválido', 400);
   return id;
