@@ -1,18 +1,20 @@
 import {Transaction} from 'sequelize';
 import Charge from './entities/charge.model';
+import {ChargeChannel} from './enums/charge-channel';
+import {ChargeTrigger} from './enums/charge-trigger';
 
 interface CreateChargeData {
   installmentId: number;
   tenantId: number;
   sentBy: number | 'system';
-  triggeredBy: Charge['prototype']['triggeredBy'];
-  channel: Charge['prototype']['channel'];
+  triggeredBy: ChargeTrigger;
+  channel: ChargeChannel;
   message: string;
 }
 
 const ChargeRepository = {
   create: async (data: CreateChargeData, transaction?: Transaction) =>
-    Charge.create(data as Parameters<typeof Charge.create>[0], {transaction}),
+    Charge.create(data, {transaction}),
   findManyByInstallment: async (installmentId: number, tenantId: number) =>
     Charge.findAll({where: {installmentId, tenantId}, order: [['createdAt', 'DESC']]}),
 };
