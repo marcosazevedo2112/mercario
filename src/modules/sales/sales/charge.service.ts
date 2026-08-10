@@ -5,22 +5,21 @@ import {ChargeChannel} from './enums/charge-channel';
 import {ChargeTrigger} from './enums/charge-trigger';
 import {InstallmentStatus} from './enums/installment-status';
 
-interface SendChargeData {
-  channel: ChargeChannel;
-  triggeredBy: ChargeTrigger;
-  message: string;
-  sentBy: number | 'system';
-}
+interface SendChargeData {channel: ChargeChannel; triggeredBy: ChargeTrigger; message: string; sentBy: number | 'system'}
 
 const ChargeService = {
-  send: async (installmentId: number, tenantId: number, data: SendChargeData) => {
-    const installment = await Installment.findOne({where: {id: installmentId, tenantId}});
+  send: async (saleId: number, installmentId: number, tenantId: number, data: SendChargeData) => {
+    const installment = await Installment.findOne({where: {id: installmentId, saleId, tenantId}});
     if (!installment) throw new AppError('Parcela não encontrada', 404);
     if (installment.status !== InstallmentStatus.PENDING) throw new AppError('Só é possível cobrar uma parcela pendente', 400);
     if (!data.message.trim()) throw new AppError('A mensagem da cobrança é obrigatória', 400);
     return ChargeRepository.create({...data, installmentId, tenantId});
   },
-  findMany: (installmentId: number, tenantId: number) => ChargeRepository.findManyByInstallment(installmentId, tenantId),
+  findMany: (saleId: number, installmentId: number, tenantId: number) =>
+    Installment.findOne({where: {id: installmentId, saleId, tenantId}}).then(installment => {
+      if (!installment) throw new AppError('Parcela não encontrada', 404);
+      return ChargeRepository.findManyByInstallment(installmentId, tenantId);
+    }),
 };
 
 export default ChargeService;
