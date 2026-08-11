@@ -1,0 +1,8 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><h1 class="page-title">Cobranças <span class="page-count">(<%= charges.length %>)</span></h1></header>
+  <% let currentDue = ''; charges.forEach(charge => { if (charge.due !== currentDue) { currentDue = charge.due; %><div class="date-heading"><%= charge.due %></div><% } %>
+    <a class="charge-row" href="/cobrancas/<%= charge.id %>"><span class="dot <%= charge.priority %>"></span><div class="charge-info"><p class="charge-name"><%= charge.customer %></p></div><span class="price">R$ <%= charge.value.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></span></a>
+  <% }) %>
+</main>
+<%- include('../partials/footer', {active}) %>
