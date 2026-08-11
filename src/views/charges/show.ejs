@@ -1,0 +1,10 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><a class="back-btn" href="/cobrancas">‹</a><h1 class="page-title" style="font-size:15px">Cobrança</h1><span></span></header>
+  <section class="hero"><div class="avatar avatar-lg" style="margin-bottom:10px"><%= charge.initials %></div><h1 class="hero-title"><%= charge.customer %></h1><p class="hero-price">R$ <%= charge.value.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></p><span class="status pending">Vence hoje</span></section>
+  <div class="stat-grid"><div class="stat"><p class="stat-label">Forma</p><p class="stat-value" style="font-size:15px"><%= charge.method %></p></div><div class="stat"><p class="stat-label">Parcelado</p><p class="stat-value" style="font-size:15px"><%= charge.installment %></p></div></div>
+  <div class="actions"><button class="btn btn-orange">Cobrar</button><button class="btn btn-secondary">Registrar pagamento</button></div>
+  <div class="section-label">Histórico</div>
+  <div class="card"><div class="product-list-row"><div><p class="item-sub">04/07</p><p class="item-name">Cobrança enviada</p></div></div><div class="product-list-row"><div><p class="item-sub">02/07</p><p class="item-name">Lembrete enviado</p></div></div><div class="product-list-row"><div><p class="item-sub">30/06</p><p class="item-name">Venda criada</p></div></div></div>
+</main>
+<%- include('../partials/footer', {active}) %>
