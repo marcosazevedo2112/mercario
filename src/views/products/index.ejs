@@ -1,0 +1,14 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><h1 class="page-title">Produtos <span class="page-count">(<%= products.length %>)</span></h1></header>
+  <form class="search" method="get"><span>⌕</span><input name="q" placeholder="Pesquisar produto" aria-label="Pesquisar produto"></form>
+  <div class="card list-card">
+    <% products.forEach(product => { %>
+      <a class="row" href="/produtos/<%= product.id %>">
+        <div class="item-main"><div class="product-icon">□</div><div class="item-copy"><p class="item-name"><%= product.name %></p><span class="stock <%= product.stock <= 4 ? 'low' : '' %>">Estoque: <%= product.stock %></span></div></div>
+        <div style="text-align:right"><div class="price">R$ <%= product.price.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></div><span class="chevron">›</span></div>
+      </a>
+    <% }) %>
+  </div>
+</main>
+<%- include('../partials/footer', {active}) %>
