@@ -1,0 +1,14 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><h1 class="page-title">Clientes <span class="page-count">(<%= customers.length %>)</span></h1></header>
+  <form class="search" method="get"><span>⌕</span><input name="q" placeholder="Buscar cliente" aria-label="Buscar cliente"></form>
+  <div class="card list-card">
+    <% customers.forEach(customer => { %>
+      <a class="row" href="/clientes/<%= customer.id %>">
+        <div class="item-main"><div class="avatar"><%= customer.name.split(' ').map(n => n[0]).slice(0,2).join('') %></div><div class="item-copy"><p class="item-name"><%= customer.name %> <span style="color:var(--text-secondary);font-weight:400">(<%= customer.nickname %>)</span></p><p class="item-sub"><%= customer.phone %></p></div></div>
+        <span class="chevron">›</span>
+      </a>
+    <% }) %>
+  </div>
+</main>
+<%- include('../partials/footer', {active}) %>
