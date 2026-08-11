@@ -1,0 +1,13 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><h1 class="page-title">Vendas <span class="page-count">(<%= sales.length %>)</span></h1><button class="icon-btn">⌕</button></header>
+  <% let currentDate = ''; sales.forEach(sale => { if (sale.date !== currentDate) { currentDate = sale.date; %>
+    <div class="date-heading"><%= sale.date %></div>
+  <% } %>
+  <a class="sale-row" href="/vendas/<%= sale.id %>">
+    <div class="sale-left"><div class="avatar"><%= sale.initials %></div><div><p class="sale-name"><%= sale.customer %></p><p class="sale-meta"><%= sale.products %> <%= sale.products === 1 ? 'produto' : 'produtos' %></p></div></div>
+    <div><div class="sale-value">R$ <%= sale.total.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></div><div class="sale-time"><%= sale.time %></div></div>
+  </a>
+  <% }) %>
+</main>
+<%- include('../partials/footer', {active}) %>
