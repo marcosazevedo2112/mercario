@@ -1,0 +1,15 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><a class="back-btn" href="/vendas">‹</a><h1 class="page-title" style="font-size:15px">Pedido</h1><span></span></header>
+  <section class="hero blue"><p class="hero-sub">Pedido #<%= sale.id %></p><p class="hero-price">R$ <%= sale.total.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></p><span class="status">Pago</span></section>
+  <section class="card">
+    <div class="item-main"><div class="avatar"><%= sale.initials %></div><div><p class="item-name"><%= sale.customer %></p><p class="item-sub"><%= sale.date %> · <%= sale.time %></p></div></div>
+  </section>
+  <div class="section-label">Produtos</div>
+  <div class="card">
+    <% saleProducts.forEach(item => { %><div class="product-list-row"><div><p class="item-name"><%= item.name %></p><p class="item-sub"><%= item.quantity %>x</p></div><span class="price">R$ <%= item.total.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></span></div><% }) %>
+  </div>
+  <div class="card" style="display:flex;justify-content:space-between;font-weight:600"><span style="color:var(--text-secondary)">Total</span><span class="price" style="font-size:17px">R$ <%= sale.total.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></span></div>
+  <div class="actions"><a class="btn btn-secondary" href="#">Compartilhar</a><button class="btn btn-danger">Cancelar</button></div>
+</main>
+<%- include('../partials/footer', {active}) %>
