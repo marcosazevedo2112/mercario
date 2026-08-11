@@ -1,0 +1,23 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><a class="back-btn" href="/clientes">‹</a><span></span><button class="icon-btn">⋮</button></header>
+  <section class="client-hero">
+    <div class="avatar avatar-lg"><%= customer.name.split(' ').map(n => n[0]).slice(0,2).join('') %></div>
+    <h1 class="client-name"><%= customer.name %></h1>
+    <p class="client-role"><%= customer.nickname %></p>
+    <p class="client-meta">⌖ Belo Horizonte — MG</p>
+    <p class="client-meta">☎ <%= customer.phone %></p>
+  </section>
+  <div class="actions"><a class="btn btn-secondary" href="tel:<%= customer.phone %>">Ligar</a><a class="btn btn-primary" href="https://wa.me/<%= customer.phone.replace(/\D/g, '') %>">Conversar</a></div>
+  <div class="stat-grid">
+    <div class="stat"><p class="stat-label">Compras</p><p class="stat-value"><%= customer.purchases %></p><p class="note">+9 desde a última análise</p></div>
+    <div class="stat"><p class="stat-label">Última compra</p><p class="stat-value" style="font-size:14px"><%= customer.lastPurchase %></p></div>
+  </div>
+  <div class="section-label">Compras de <%= customer.name.split(' ')[0] %></div>
+  <div class="card list-card">
+    <% sales.forEach(sale => { %>
+      <a class="row" href="/vendas/<%= sale.id %>"><div><p class="item-name"><%= sale.date %></p><p class="item-sub">À vista · <%= sale.products %> produtos</p></div><span class="price">R$ <%= sale.total.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></span></a>
+    <% }) %>
+  </div>
+</main>
+<%- include('../partials/footer', {active}) %>
