@@ -6,7 +6,7 @@ import Charge from './charge.model';
 
 Sale.hasMany(SaleItem, {foreignKey: 'saleId', as: 'items'});
 SaleItem.belongsTo(Sale, {foreignKey: 'saleId', as: 'sale'});
-Sale.hasMany(Installment, {foreignKey: 'saleId', as: 'installments'});
+Sale.hasMany(Installment, {foreignKey: 'saleId', as: 'Saleinstallments'});
 Installment.belongsTo(Sale, {foreignKey: 'saleId', as: 'sale'});
 Sale.hasOne(Settlement, {foreignKey: 'saleId', as: 'settlement'});
 Settlement.belongsTo(Sale, {foreignKey: 'saleId', as: 'sale'});

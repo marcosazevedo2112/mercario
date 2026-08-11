@@ -1,6 +1,8 @@
 import {PaymentPlan} from './value-objects/payment-plan';
 import {Money} from './value-objects/money';
-import InstallmentGenerationService, {GeneratedInstallment} from './installment-generation.service';
+import InstallmentGenerationService, {
+  GeneratedInstallment,
+} from './installment-generation.service';
 import {SaleStatus} from './enums/sale-status';
 
 export interface SaleItemSnapshot {
@@ -47,7 +49,8 @@ export class SaleAggregate {
 
   addItem(item: SaleItemSnapshot): void {
     this.ensureBuilding();
-    if (item.quantity <= 0 || !Number.isInteger(item.quantity)) throw new Error('A quantidade do item deve ser positiva');
+    if (item.quantity <= 0 || !Number.isInteger(item.quantity))
+      throw new Error('A quantidade do item deve ser positiva');
     this.items.push(item);
   }
 
@@ -64,19 +67,26 @@ export class SaleAggregate {
 
   setDiscount(discountCents: number): void {
     this.ensureBuilding();
-    if (!Number.isInteger(discountCents) || discountCents < 0) throw new Error('O desconto deve ser um valor inteiro não negativo');
-    if (discountCents > this.subtotalCents()) throw new Error('O desconto não pode ser maior que o subtotal');
+    if (!Number.isInteger(discountCents) || discountCents < 0)
+      throw new Error('O desconto deve ser um valor inteiro não negativo');
+    if (discountCents > this.subtotalCents())
+      throw new Error('O desconto não pode ser maior que o subtotal');
     this.discountCents = discountCents;
   }
 
   confirm(): ConfirmedSale {
     this.ensureBuilding();
-    if (this.items.length === 0) throw new Error('A venda deve possuir ao menos um item');
-    if (!this.paymentPlan) throw new Error('O plano de pagamento é obrigatório');
+    if (this.items.length === 0)
+      throw new Error('A venda deve possuir ao menos um item');
+    if (!this.paymentPlan)
+      throw new Error('O plano de pagamento é obrigatório');
 
     this.confirmed = true;
     const totalCents = this.subtotalCents() - this.discountCents;
-    const generated = InstallmentGenerationService.generate(Money.fromCents(totalCents), this.paymentPlan);
+    const generated = InstallmentGenerationService.generate(
+      Money.fromCents(totalCents),
+      this.paymentPlan,
+    );
 
     return {
       sale: {
@@ -104,6 +114,7 @@ export class SaleAggregate {
   }
 
   private ensureBuilding(): void {
-    if (this.confirmed) throw new Error('A venda já foi confirmada e não pode mais ser alterada');
+    if (this.confirmed)
+      throw new Error('A venda já foi confirmada e não pode mais ser alterada');
   }
 }

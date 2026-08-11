@@ -22,9 +22,12 @@ export class PaymentPlan {
   }
 
   static create(props: PaymentPlanProps): PaymentPlan {
-    if (Number.isNaN(props.initialDueDate.getTime())) throw new Error('A data de vencimento inicial é inválida');
-    if (!Number.isInteger(props.installments) || props.installments <= 0) throw new Error('A quantidade de parcelas deve ser maior que zero');
-    if (props.modality === PaymentModality.ONCE && props.installments !== 1) throw new Error('A modalidade ONCE deve possuir exatamente uma parcela');
+    if (Number.isNaN(props.initialDueDate.getTime()))
+      throw new Error('A data de vencimento inicial é inválida');
+    if (!Number.isInteger(props.installments) || props.installments <= 0)
+      throw new Error('A quantidade de parcelas deve ser maior que zero');
+    if (props.modality === PaymentModality.ONCE && props.installments !== 1)
+      throw new Error('A modalidade ONCE deve possuir exatamente uma parcela');
     return new PaymentPlan(props);
   }
 }

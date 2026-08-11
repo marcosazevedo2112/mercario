@@ -3,7 +3,6 @@ import AuthService from './auth.service';
 import {AppError} from '../../errors/appError';
 
 const AuthController = {
-  loginPage: (req: Request, res: Response) => {},
   login: async (req: Request, res: Response) => {
     try {
       const user = await AuthService.login(req.body);
@@ -48,7 +47,6 @@ const AuthController = {
     });
   },
 
-  registerPage: (req: Request, res: Response) => {},
   register: async (req: Request, res: Response) => {
     try {
       const {user, tenant} = await AuthService.createAccount(req.body);
@@ -71,12 +69,6 @@ const AuthController = {
       }
     }
   },
-
-  forgotPasswordPage: (req: Request, res: Response) => {},
-  forgotPassword: (req: Request, res: Response) => {},
-
-  resetPasswordPage: (req: Request, res: Response) => {},
-  resetPassword: (req: Request, res: Response) => {},
 };
 
 export default AuthController;

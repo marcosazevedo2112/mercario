@@ -1,8 +1,17 @@
-import {CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, Model} from 'sequelize';
+import {
+  CreationOptional,
+  DataTypes,
+  InferAttributes,
+  InferCreationAttributes,
+  Model,
+} from 'sequelize';
 import sequelize from '../../../../database/connection';
 import {PaymentMethod} from '../enums/payment-method';
 
-class Settlement extends Model<InferAttributes<Settlement>, InferCreationAttributes<Settlement>> {
+class Settlement extends Model<
+  InferAttributes<Settlement>,
+  InferCreationAttributes<Settlement>
+> {
   declare id: CreationOptional<number>;
   declare saleId: number;
   declare tenantId: number;
@@ -36,10 +45,7 @@ Settlement.init(
     sequelize,
     tableName: 'settlements',
     timestamps: true,
-    indexes: [
-      {fields: ['tenantId']},
-      {fields: ['saleId'], unique: true},
-    ],
+    indexes: [{fields: ['tenantId']}, {fields: ['saleId'], unique: true}],
   },
 );
 

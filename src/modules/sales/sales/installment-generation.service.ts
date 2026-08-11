@@ -15,7 +15,10 @@ interface GeneratedInstallment {
 }
 
 const InstallmentGenerationService = {
-  generate: (total: Money, paymentPlan: PaymentPlan): GeneratedInstallment[] => {
+  generate: (
+    total: Money,
+    paymentPlan: PaymentPlan,
+  ): GeneratedInstallment[] => {
     const baseAmount = Math.floor(total.cents / paymentPlan.installments);
     const remainder = total.cents % paymentPlan.installments;
 

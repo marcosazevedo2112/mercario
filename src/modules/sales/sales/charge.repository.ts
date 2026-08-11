@@ -16,7 +16,10 @@ const ChargeRepository = {
   create: async (data: CreateChargeData, transaction?: Transaction) =>
     Charge.create(data, {transaction}),
   findManyByInstallment: async (installmentId: number, tenantId: number) =>
-    Charge.findAll({where: {installmentId, tenantId}, order: [['createdAt', 'DESC']]}),
+    Charge.findAll({
+      where: {installmentId, tenantId},
+      order: [['createdAt', 'DESC']],
+    }),
 };
 
 export default ChargeRepository;

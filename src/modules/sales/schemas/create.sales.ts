@@ -4,7 +4,14 @@ import {PaymentModality} from '../sales/enums/payment-modality';
 
 export const createSaleSchema = z.object({
   customerId: z.number().int().positive(),
-  items: z.array(z.object({productId: z.number().int().positive(), quantity: z.number().int().positive()})).min(1),
+  items: z
+    .array(
+      z.object({
+        productId: z.number().int().positive(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .min(1),
   discountCents: z.number().int().nonnegative(),
   paymentPlan: z.object({
     paymentMethod: z.nativeEnum(PaymentMethod),
