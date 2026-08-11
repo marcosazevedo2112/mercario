@@ -1,0 +1,18 @@
+<%- include('../partials/head', {title}) %>
+<main class="container">
+  <header class="page-header"><a class="back-btn" href="/produtos">‹</a><h1 class="page-title" style="font-size:15px"><%= product.name %></h1><button class="icon-btn">⋮</button></header>
+  <section class="hero"><div class="product-icon" style="margin:0 auto 12px;width:56px;height:56px">□</div><h1 class="hero-title"><%= product.name %></h1><p class="hero-price">R$ <%= product.price.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></p></section>
+  <div class="stat-grid">
+    <div class="stat"><p class="stat-label">Lucro</p><p class="stat-value orange">R$ <%= product.profit.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></p></div>
+    <div class="stat"><p class="stat-label">Estoque</p><p class="stat-value"><%= product.stock %> un</p></div>
+    <div class="stat" style="grid-column:span 2"><p class="stat-label">Vendidos este mês</p><p class="stat-value blue"><%= product.sold %></p></div>
+  </div>
+  <div class="section-label">Últimas vendas</div>
+  <div class="card list-card">
+    <% sales.forEach(sale => { %>
+      <a class="row" href="/vendas/<%= sale.id %>"><div class="item-main"><div class="avatar"><%= sale.initials %></div><div><p class="item-name"><%= sale.customer %></p><p class="item-sub"><%= sale.date %></p></div></div><span class="price">R$ <%= product.price.toLocaleString('pt-BR', {minimumFractionDigits:2}) %></span></a>
+    <% }) %>
+  </div>
+  <a class="btn btn-primary" href="#">Editar produto</a>
+</main>
+<%- include('../partials/footer', {active}) %>
