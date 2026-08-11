@@ -137,9 +137,7 @@ const SaleRepository = {
         where: {
           saleId,
           tenantId,
-          status: {
-            [Op.in]: [InstallmentStatus.PENDING, InstallmentStatus.PAID],
-          },
+          status: InstallmentStatus.PENDING,
         },
         transaction,
       },
