@@ -1,0 +1,32 @@
+<%- include('partials/head', {title}) %>
+<main class="container">
+  <p class="greeting">Bom dia, Ana! 👋</p>
+  <p class="greeting-sub">Aqui está o resumo das suas vendas.</p>
+
+  <section class="metric">
+    <p class="metric-label">Suas vendas este mês</p>
+    <div class="metric-row"><p class="metric-value">R$ <%= metrics.sales.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></p><span class="delta">+12%</span></div>
+    <p class="note">comparado ao mês anterior</p>
+  </section>
+  <section class="metric">
+    <p class="metric-label">Lucro estimado para este mês</p>
+    <div class="metric-row"><p class="metric-value">R$ <%= metrics.profit.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></p></div>
+    <p class="note">Aumentando sua margem</p>
+  </section>
+
+  <div class="stat-grid">
+    <div class="stat"><p class="stat-label">Clientes ativos</p><p class="stat-value"><%= metrics.customers %></p><p class="note">-10 no mês</p></div>
+    <div class="stat"><p class="stat-label">Produtos</p><p class="stat-value"><%= metrics.products %></p></div>
+  </div>
+
+  <div class="section-label">Suas últimas vendas</div>
+  <div class="card list-card">
+    <% recentSales.forEach(sale => { %>
+      <a class="row" href="/vendas/<%= sale.id %>">
+        <div class="item-main"><div class="avatar"><%= sale.initials %></div><div class="item-copy"><p class="item-name"><%= sale.customer %></p><p class="item-sub"><%= sale.products %> produtos · <%= sale.time %></p></div></div>
+        <span class="price">R$ <%= sale.total.toLocaleString('pt-BR', {minimumFractionDigits: 2}) %></span>
+      </a>
+    <% }) %>
+  </div>
+</main>
+<%- include('partials/footer', {active}) %>
