@@ -1,0 +1,396 @@
+openapi: 3.0.3
+info:
+  title: Mercario API
+  version: 1.0.0
+  description: API atual do Mercario para autenticação, clientes, produtos e vendas.
+servers:
+  - url: /api
+    description: API
+
+tags:
+  - name: Auth
+  - name: Products
+  - name: Customers
+  - name: Sales
+  - name: Charges
+
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Cria uma conta e um tenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAccount'
+      responses:
+        '201': {description: Conta criada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Autentica o usuário
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginAccount'
+      responses:
+        '200': {description: Usuário autenticado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Encerra a sessão atual
+      security: [{sessionAuth: []}]
+      responses:
+        '204': {description: Sessão encerrada}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /products:
+    get:
+      tags: [Products]
+      summary: Lista produtos
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Lista de produtos}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Products]
+      summary: Cria um produto
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProductCreate'}
+      responses:
+        '201': {description: Produto criado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /products/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Products]
+      summary: Busca um produto
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Produto encontrado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Products]
+      summary: Atualiza um produto
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ProductUpdate'}
+      responses:
+        '200': {description: Produto atualizado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    delete:
+      tags: [Products]
+      summary: Exclui um produto
+      security: [{sessionAuth: []}]
+      responses:
+        '204': {description: Produto excluído}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /customers:
+    get:
+      tags: [Customers]
+      summary: Lista clientes
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Lista de clientes}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Customers]
+      summary: Cria um cliente
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CustomerCreate'}
+      responses:
+        '201': {description: Cliente criado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /customers/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Customers]
+      summary: Busca um cliente
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Cliente encontrado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    put:
+      tags: [Customers]
+      summary: Atualiza um cliente
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CustomerUpdate'}
+      responses:
+        '200': {description: Cliente atualizado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    delete:
+      tags: [Customers]
+      summary: Exclui um cliente
+      security: [{sessionAuth: []}]
+      responses:
+        '204': {description: Cliente excluído}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /sales:
+    get:
+      tags: [Sales]
+      summary: Lista vendas
+      security: [{sessionAuth: []}]
+      parameters:
+        - {name: page, in: query, schema: {type: integer, minimum: 1, default: 1}}
+        - {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
+        - {name: status, in: query, schema: {$ref: '#/components/schemas/SaleStatus'}}
+        - {name: customerId, in: query, schema: {type: integer, minimum: 1}}
+        - {name: search, in: query, schema: {type: string}}
+      responses:
+        '200': {description: Lista paginada de vendas}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Sales]
+      summary: Cria e confirma uma venda
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SaleCreate'}
+      responses:
+        '201': {description: Venda criada e confirmada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /sales/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      tags: [Sales]
+      summary: Busca uma venda
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Venda encontrada}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '404': {$ref: '#/components/responses/NotFound'}
+
+  /sales/{id}/cancel:
+    post:
+      tags: [Sales]
+      summary: Cancela uma venda
+      security: [{sessionAuth: []}]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: {type: string, minLength: 1, maxLength: 500}
+      responses:
+        '204': {description: Venda cancelada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /sales/{id}/settle:
+    post:
+      tags: [Sales]
+      summary: Realiza a quitação antecipada de uma venda
+      security: [{sessionAuth: []}]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/SettlementCreate'}
+      responses:
+        '201': {description: Quitação registrada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /sales/{id}/installments/{installmentId}/payment:
+    post:
+      tags: [Sales]
+      summary: Registra o pagamento integral de uma parcela
+      security: [{sessionAuth: []}]
+      parameters:
+        - {$ref: '#/components/parameters/Id'}
+        - {name: installmentId, in: path, required: true, schema: {type: integer, minimum: 1}}
+      responses:
+        '204': {description: Pagamento registrado}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+  /sales/{id}/installments/{installmentId}/charges:
+    parameters:
+      - {$ref: '#/components/parameters/Id'}
+      - {name: installmentId, in: path, required: true, schema: {type: integer, minimum: 1}}
+    get:
+      tags: [Charges]
+      summary: Lista cobranças de uma parcela
+      security: [{sessionAuth: []}]
+      responses:
+        '200': {description: Histórico de cobranças}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+    post:
+      tags: [Charges]
+      summary: Registra uma cobrança enviada
+      security: [{sessionAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/ChargeCreate'}
+      responses:
+        '201': {description: Cobrança registrada}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: connect.sid
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: {type: integer, minimum: 1}
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+    Unauthorized:
+      description: Não autenticado
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+  schemas:
+    Error:
+      type: object
+      properties:
+        message: {type: string}
+    RegisterAccount:
+      type: object
+      required: [tenantName, name, email, password]
+      properties:
+        tenantName: {type: string, minLength: 2, maxLength: 100}
+        name: {type: string, minLength: 2, maxLength: 100}
+        email: {type: string, format: email, maxLength: 255}
+        password: {type: string, minLength: 8, maxLength: 100, format: password}
+    LoginAccount:
+      type: object
+      required: [email, password]
+      properties:
+        email: {type: string, format: email, maxLength: 255}
+        password: {type: string, minLength: 8, maxLength: 100, format: password}
+    ProductCreate:
+      type: object
+      description: Schema detalhado conforme o schema de Products do projeto.
+      additionalProperties: true
+    ProductUpdate:
+      type: object
+      description: Schema detalhado conforme o schema de atualização de Products do projeto.
+      additionalProperties: true
+    CustomerCreate:
+      type: object
+      description: Schema detalhado conforme o schema de Customers do projeto.
+      additionalProperties: true
+    CustomerUpdate:
+      type: object
+      description: Schema detalhado conforme o schema de atualização de Customers do projeto.
+      additionalProperties: true
+    SaleStatus:
+      type: string
+      enum: [OPEN, CANCELED, COMPLETED]
+    PaymentMethod:
+      type: string
+      enum: [PIX, BOLETO, CREDIT_CARD, DEBIT_CARD, CASH]
+    PaymentModality:
+      type: string
+      enum: [ONCE, WEEKLY, MONTHLY]
+    ChargeChannel:
+      type: string
+      enum: [WHATSAPP, EMAIL]
+    ChargeTrigger:
+      type: string
+      enum: [MANUAL, AUTOMATIC]
+    SaleCreate:
+      type: object
+      required: [customerId, items, discountCents, paymentPlan]
+      properties:
+        customerId: {type: integer, minimum: 1}
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [productId, quantity]
+            properties:
+              productId: {type: integer, minimum: 1}
+              quantity: {type: integer, minimum: 1}
+        discountCents: {type: integer, minimum: 0}
+        paymentPlan:
+          type: object
+          required: [paymentMethod, installments, initialDueDate, modality]
+          properties:
+            paymentMethod: {$ref: '#/components/schemas/PaymentMethod'}
+            installments: {type: integer, minimum: 1}
+            initialDueDate: {type: string, format: date-time}
+            modality: {$ref: '#/components/schemas/PaymentModality'}
+        notes: {type: string, maxLength: 500}
+    SettlementCreate:
+      type: object
+      required: [paymentMethod]
+      properties:
+        discountCents: {type: integer, minimum: 0, default: 0}
+        paymentMethod: {$ref: '#/components/schemas/PaymentMethod'}
+        notes: {type: string, maxLength: 500}
+    ChargeCreate:
+      type: object
+      required: [channel, triggeredBy, message]
+      properties:
+        channel: {$ref: '#/components/schemas/ChargeChannel'}
+        triggeredBy: {$ref: '#/components/schemas/ChargeTrigger'}
+        message: {type: string, minLength: 1, maxLength: 5000}
