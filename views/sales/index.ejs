@@ -1,15 +1,7 @@
 <%- include('../partials/head', {title: 'Mercario — Vendas'}) %>
-<body id="pagina__vendas">
-  <div class="page-shell"><div class="page-container"><main class="page-content">
-    <div class="page-header"><h1 class="page-title">Vendas <span class="page-count">(<%= pagination ? pagination.total : 0 %>)</span></h1></div>
-    <% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %>
-    <div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Pesquisar venda" aria-label="Pesquisar venda"></div>
-    <div class="card-mercario list-card">
-      <% if (!sales.length) { %><div class="empty-state"><strong>Nenhuma venda encontrada</strong>Quando você registrar uma venda, ela aparecerá aqui.</div><% } %>
-      <% sales.forEach(sale => { const customerName = sale.customer ? sale.customer.name : 'Cliente não identificado'; const parts = customerName.split(' ').slice(0,2); const initials = parts.map(part => part.charAt(0)).join('').toUpperCase(); const total = (sale.totalCents / 100).toFixed(2).replace('.', ','); const statusClass = sale.status === 'OPEN' ? 'status-open' : sale.status === 'COMPLETED' ? 'status-completed' : 'status-canceled'; const statusLabel = sale.status === 'OPEN' ? 'Aberta' : sale.status === 'COMPLETED' ? 'Concluída' : 'Cancelada'; %>
-        <div class="sale-row"><div class="sale-left"><div class="avatar-sm"><%= initials %></div><div><p class="sale-name"><%= customerName %></p><p class="sale-meta"><%= sale.items ? sale.items.length : 0 %> itens · <span class="status-badge <%= statusClass %>"><%= statusLabel %></span></p></div></div><div class="sale-right"><div class="sale-value">R$ <%= total %></div><div class="sale-time"><%= new Date(sale.createdAt).toLocaleDateString('pt-BR') %></div></div></div>
-      <% }) %>
-    </div>
-  </main><%- include('../partials/bottom-nav', {active: 'sales'}) %></div></div>
-</body>
-</html>
+<body id="pagina__vendas"><div class="page-shell"><div class="page-container"><main class="page-content">
+<div class="page-header"><h1 class="page-title">Vendas <span class="page-count">(<%= pagination ? pagination.total : 0 %>)</span></h1><a href="/sales/new" class="icon-button" aria-label="Nova venda"><i class="bi bi-plus-lg"></i></a></div>
+<% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %><div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Pesquisar venda" aria-label="Pesquisar venda"></div>
+<div class="card-mercario list-card"><% if (!sales.length) { %><div class="empty-state"><strong>Nenhuma venda encontrada</strong>Quando você registrar uma venda, ela aparecerá aqui.</div><% } %>
+<% sales.forEach(sale => { const customerName = sale.customer ? sale.customer.name : 'Cliente não identificado'; const parts = customerName.split(' ').slice(0,2); const initials = parts.map(part => part.charAt(0)).join('').toUpperCase(); const total = (sale.totalCents / 100).toFixed(2).replace('.', ','); const statusClass = sale.status === 'OPEN' ? 'status-open' : sale.status === 'COMPLETED' ? 'status-completed' : 'status-canceled'; const statusLabel = sale.status === 'OPEN' ? 'Aberta' : sale.status === 'COMPLETED' ? 'Concluída' : 'Cancelada'; %><a href="/sales/<%= sale.id %>" class="sale-row"><div class="sale-left"><div class="avatar-sm"><%= initials %></div><div><p class="sale-name"><%= customerName %></p><p class="sale-meta"><%= sale.items ? sale.items.length : 0 %> itens · <span class="status-badge <%= statusClass %>"><%= statusLabel %></span></p></div></div><div class="sale-right"><div class="sale-value">R$ <%= total %></div><div class="sale-time"><%= new Date(sale.createdAt).toLocaleDateString('pt-BR') %></div></div></a><% }) %></div>
+</main><%- include('../partials/bottom-nav',{active:'sales'}) %></div></div></body></html>
