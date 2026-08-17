@@ -1,0 +1,27 @@
+<%- include('../partials/head', {title: 'Mercario — Cliente'}) %>
+<body><div class="page-shell"><div class="page-container"><main class="page-content">
+  <%- include('../partials/detail-header', {title: 'Cliente', backHref: '/customers', menuHref: null}) %>
+  <div id="loading" class="empty-state">Carregando cliente...</div>
+  <div id="content" style="display:none">
+    <div class="card-mercario hero-card">
+      <div id="avatar" class="avatar-sm mx-auto mb-2" style="width:64px;height:64px;font-size:18px"></div>
+      <p id="name" class="hero-name"></p><p id="nickname" class="item-sub"></p>
+      <div class="action-row-mercario"><a id="whatsapp" class="btn-outline-mercario"><i class="bi bi-whatsapp"></i> Conversar</a><a id="phone" class="btn-outline-mercario"><i class="bi bi-telephone"></i> Ligar</a></div>
+    </div>
+    <div class="card-mercario form-card mb-3">
+      <div class="section-label mt-0">Contato</div><p id="contact" class="item-sub mb-2"></p><p id="address" class="item-sub mb-2"></p><p id="notes" class="item-sub mb-0"></p>
+    </div>
+    <a href="/customers/<%= customerId %>/edit" class="btn-mercario">Editar cliente</a>
+  </div>
+  <div id="error" class="alert alert-mercario" style="display:none"></div>
+</main><%- include('../partials/bottom-nav', {active: 'customers'}) %></div></div>
+<script>
+const id = <%= JSON.stringify(customerId) %>;
+const money = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+fetch('/api/customers/'+encodeURIComponent(id)).then(r=>r.ok?r.json():r.json().then(e=>Promise.reject(new Error(e.message||'Cliente não encontrado')))).then(c=>{
+  const initials=c.name.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  avatar.textContent=initials; name.textContent=c.name; nickname.textContent=c.nickname||''; contact.textContent=[c.phone,c.email].filter(Boolean).join(' · ')||'Contato não informado'; address.textContent=c.address||'Endereço não informado'; notes.textContent=c.notes||'';
+  if(c.phone){phone.href='tel:'+c.phone;whatsapp.href='https://wa.me/'+c.phone.replace(/\D/g,'')}else{phone.style.display='none';whatsapp.style.display='none'}
+  loading.style.display='none';content.style.display='block';
+}).catch(e=>{loading.style.display='none';error.textContent=e.message;error.style.display='block'});
+</script></body></html>
