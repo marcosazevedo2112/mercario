@@ -13,9 +13,24 @@ router.get('/', (_req: Request, res: Response) => {
       products: 76,
     },
     recentSales: [
-      {initials: 'JC', customer: 'João Carlos', meta: '2 produtos', value: 'R$ 99,99'},
-      {initials: 'FS', customer: 'Fernanda Souza', meta: '3 produtos', value: 'R$ 246,00'},
-      {initials: 'AP', customer: 'Ana Paula', meta: '1 produto', value: 'R$ 39,90'},
+      {
+        initials: 'JC',
+        customer: 'João Carlos',
+        meta: '2 produtos',
+        value: 'R$ 99,99',
+      },
+      {
+        initials: 'FS',
+        customer: 'Fernanda Souza',
+        meta: '3 produtos',
+        value: 'R$ 246,00',
+      },
+      {
+        initials: 'AP',
+        customer: 'Ana Paula',
+        meta: '1 produto',
+        value: 'R$ 39,90',
+      },
     ],
     error: null,
   });
