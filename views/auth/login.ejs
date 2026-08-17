@@ -10,7 +10,7 @@
         <% if (typeof registered !== 'undefined' && registered) { %><div class="alert alert-success py-2 mb-3">Conta criada. Agora entre para continuar.</div><% } %>
         <form method="post" action="/login">
           <div class="mb-3"><label class="form-label" for="email">E-mail</label><input class="form-control form-control-mercario" id="email" name="email" type="email" value="<%= email || '' %>" placeholder="seuemail@exemplo.com" required></div>
-          <div class="mb-2"><label class="form-label" for="password">Senha</label><div class="password-wrap"><input class="form-control form-control-mercario" id="password" name="password" type="password" placeholder="••••••••" required><button class="password-toggle" type="button" onclick="const i=document.getElementById('password'); i.type=i.type==='password'?'text':'password'">◉</button></div></div>
+          <div class="mb-2"><label class="form-label" for="password">Senha</label><div class="password-wrap"><input class="form-control form-control-mercario" id="password" name="password" type="password" placeholder="••••••••" required><button class="password-toggle" type="button" onclick="const i=document.getElementById('password'); i.type=i.type==='password'?'text':'password'; this.querySelector('i').className=i.type==='password'?'bi bi-eye':'bi bi-eye-slash'" aria-label="Mostrar ou ocultar senha"><i class="bi bi-eye" aria-hidden="true"></i></button></div></div>
           <div class="text-end mb-3"><span class="small text-secondary">Esqueci minha senha</span></div>
           <button class="btn btn-mercario" type="submit">Entrar</button>
         </form>
