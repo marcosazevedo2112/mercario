@@ -21,7 +21,6 @@ app.use(
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7,
       httpOnly: true,
-      domain: process.env.COOKIE_DOMAIN || 'localhost',
       path: '/',
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
