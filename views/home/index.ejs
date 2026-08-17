@@ -1,7 +1,7 @@
 <%- include('../partials/head', {title: 'Mercario — Início'}) %>
 <body id="pagina__inicio">
   <div class="page-shell"><div class="page-container"><main class="page-content">
-    <div class="mb-4"><p class="mb-1 text-secondary">Bom dia! 👋</p><h1 class="page-title">Aqui está o resumo das suas vendas.</h1></div>
+    <div class="mb-4"><p class="mb-1 text-secondary">Bom dia!</p><h1 class="page-title">Aqui está o resumo das suas vendas.</h1></div>
     <div class="metric-card card-mercario"><p class="metric-label">Suas vendas este mês</p><div class="metric-row"><p class="metric-value"><%= stats.sales %></p><span class="metric-delta up"><%= stats.salesDelta %></span></div><p class="mini-note">comparado ao mês anterior</p></div>
     <div class="metric-card card-mercario"><p class="metric-label">Lucro estimado para este mês</p><p class="metric-value"><%= stats.profit %></p><p class="mini-note">Aumentando sua margem</p></div>
     <div class="mini-grid"><div class="mini-card card-mercario"><p class="mini-label">Clientes ativos</p><p class="mini-value"><%= stats.activeCustomers %></p><p class="mini-note">-10 comparado ao mês anterior</p></div><div class="mini-card card-mercario"><p class="mini-label">Produtos</p><p class="mini-value"><%= stats.products %></p></div></div>
