@@ -1,15 +1,8 @@
 <%- include('../partials/head', {title: 'Mercario — Clientes'}) %>
-<body id="pagina__clientes">
-  <div class="page-shell"><div class="page-container"><main class="page-content">
-    <div class="page-header"><h1 class="page-title">Clientes <span class="page-count">(<%= customers.length %>)</span></h1></div>
-    <% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %>
-    <div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Buscar cliente" aria-label="Buscar cliente"></div>
-    <div class="card-mercario list-card">
-      <% if (!customers.length) { %><div class="empty-state"><strong>Nenhum cliente encontrado</strong>Cadastre clientes para começar a organizar suas vendas.</div><% } %>
-      <% customers.forEach(customer => { const parts = customer.name.split(' ').slice(0,2); const initials = parts.map(part => part.charAt(0)).join('').toUpperCase(); %>
-        <div class="list-row"><div class="d-flex align-items-center gap-2"><div class="avatar-sm"><%= initials %></div><div><p class="item-name"><%= customer.name %><% if (customer.nickname) { %> <span class="fw-normal text-secondary">(<%= customer.nickname %>)</span><% } %></p><p class="item-sub"><%= customer.phone || customer.email || 'Contato não informado' %></p></div></div><i class="bi bi-chevron-right chevron" aria-hidden="true"></i></div>
-      <% }) %>
-    </div>
-  </main><%- include('../partials/bottom-nav', {active: 'customers'}) %></div></div>
-</body>
-</html>
+<body id="pagina__clientes"><div class="page-shell"><div class="page-container"><main class="page-content">
+<div class="page-header"><h1 class="page-title">Clientes <span class="page-count">(<%= customers.length %>)</span></h1><a href="/customers/new" class="icon-button" aria-label="Novo cliente"><i class="bi bi-plus-lg"></i></a></div>
+<% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %>
+<div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Buscar cliente" aria-label="Buscar cliente"></div>
+<div class="card-mercario list-card"><% if (!customers.length) { %><div class="empty-state"><strong>Nenhum cliente encontrado</strong>Cadastre clientes para começar a organizar suas vendas.</div><% } %>
+<% customers.forEach(customer => { const parts = customer.name.split(' ').slice(0,2); const initials = parts.map(part => part.charAt(0)).join('').toUpperCase(); %><a href="/customers/<%= customer.id %>" class="list-row"><div class="d-flex align-items-center gap-2"><div class="avatar-sm"><%= initials %></div><div><p class="item-name"><%= customer.name %><% if (customer.nickname) { %> <span class="fw-normal text-secondary">(<%= customer.nickname %>)</span><% } %></p><p class="item-sub"><%= customer.phone || customer.email || 'Contato não informado' %></p></div></div><i class="bi bi-chevron-right chevron" aria-hidden="true"></i></a><% }) %></div>
+</main><%- include('../partials/bottom-nav', {active:'customers'}) %></div></div></body></html>
