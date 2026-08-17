@@ -1,0 +1,23 @@
+<%- include('../partials/head', {title: 'Mercario — Cadastro'}) %>
+<body id="pagina__cadastro">
+  <main class="auth-page page-shell">
+    <div class="page-container">
+      <div class="auth-content">
+        <div class="mb-3"><a href="/login" class="text-secondary">‹ Voltar</a></div>
+        <div class="auth-logo">M</div>
+        <h1 class="auth-title">Crie sua conta</h1>
+        <p class="auth-sub">Leva menos de um minuto para começar.</p>
+        <% if (error) { %><div class="alert alert-mercario py-2 mb-3"><%= error %></div><% } %>
+        <form method="post" action="/register">
+          <div class="mb-3"><label class="form-label" for="tenantName">Nome da empresa</label><input class="form-control form-control-mercario" id="tenantName" name="tenantName" value="<%= values.tenantName || '' %>" placeholder="Ex: Loja da Ana" required></div>
+          <div class="mb-3"><label class="form-label" for="name">Seu nome</label><input class="form-control form-control-mercario" id="name" name="name" value="<%= values.name || '' %>" placeholder="Ex: Ana Silva" required></div>
+          <div class="mb-3"><label class="form-label" for="email">E-mail</label><input class="form-control form-control-mercario" id="email" name="email" type="email" value="<%= values.email || '' %>" placeholder="seuemail@exemplo.com" required></div>
+          <div class="mb-3"><label class="form-label" for="password">Senha</label><input class="form-control form-control-mercario" id="password" name="password" type="password" placeholder="Crie uma senha" minlength="8" required></div>
+          <button class="btn btn-mercario" type="submit">Criar conta</button>
+        </form>
+        <p class="auth-link">Já tem uma conta? <a href="/login">Entrar</a></p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

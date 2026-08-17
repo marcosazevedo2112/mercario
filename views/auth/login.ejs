@@ -1,0 +1,22 @@
+<%- include('../partials/head', {title: 'Mercario — Login'}) %>
+<body id="pagina__login">
+  <main class="auth-page page-shell">
+    <div class="page-container">
+      <div class="auth-content">
+        <div class="auth-logo">M</div>
+        <h1 class="auth-title">Bem-vindo de volta</h1>
+        <p class="auth-sub">Entre para continuar organizando suas vendas.</p>
+        <% if (error) { %><div class="alert alert-mercario py-2 mb-3"><%= error %></div><% } %>
+        <% if (typeof registered !== 'undefined' && registered) { %><div class="alert alert-success py-2 mb-3">Conta criada. Agora entre para continuar.</div><% } %>
+        <form method="post" action="/login">
+          <div class="mb-3"><label class="form-label" for="email">E-mail</label><input class="form-control form-control-mercario" id="email" name="email" type="email" value="<%= email || '' %>" placeholder="seuemail@exemplo.com" required></div>
+          <div class="mb-2"><label class="form-label" for="password">Senha</label><div class="password-wrap"><input class="form-control form-control-mercario" id="password" name="password" type="password" placeholder="••••••••" required><button class="password-toggle" type="button" onclick="const i=document.getElementById('password'); i.type=i.type==='password'?'text':'password'">◉</button></div></div>
+          <div class="text-end mb-3"><span class="small text-secondary">Esqueci minha senha</span></div>
+          <button class="btn btn-mercario" type="submit">Entrar</button>
+        </form>
+        <p class="auth-link">Não tem uma conta? <a href="/register">Criar conta</a></p>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
