@@ -1,0 +1,13 @@
+<%- include('../partials/head', {title: 'Mercario — Novo cliente'}) %>
+<body><div class="page-shell"><div class="page-container"><main class="page-content">
+<%- include('../partials/detail-header', {title: 'Novo cliente', backHref: '/customers', menuHref: null}) %>
+<form id="customer-form" class="card-mercario form-card">
+<div class="form-group mb-3"><label class="form-label">Nome completo</label><input name="name" class="form-control form-control-mercario" required maxlength="150" placeholder="Ex: Ana Silva"></div>
+<div class="form-group mb-3"><label class="form-label">Apelido <span class="fw-normal text-secondary">(opcional)</span></label><input name="nickname" class="form-control form-control-mercario" maxlength="150" placeholder="Ex: Ana da loja"></div>
+<div class="form-group mb-3"><label class="form-label">Telefone <span class="fw-normal text-secondary">(opcional)</span></label><input name="phone" class="form-control form-control-mercario" maxlength="30" placeholder="+55 31 90000-0000"></div>
+<div class="form-group mb-3"><label class="form-label">E-mail <span class="fw-normal text-secondary">(opcional)</span></label><input name="email" type="email" class="form-control form-control-mercario" maxlength="180" placeholder="cliente@exemplo.com"></div>
+<div class="form-group mb-3"><label class="form-label">Endereço <span class="fw-normal text-secondary">(opcional)</span></label><input name="address" class="form-control form-control-mercario" maxlength="500" placeholder="Rua, número, bairro - cidade"></div>
+<div class="form-group mb-3"><label class="form-label">Observações <span class="fw-normal text-secondary">(opcional)</span></label><textarea name="notes" class="form-control form-control-mercario" rows="3" maxlength="1000" placeholder="Informações importantes"></textarea></div>
+<div id="error" class="error-message"></div><button class="btn-mercario mt-2" type="submit">Salvar cliente</button>
+</form></main></div></div>
+<script>const form=document.getElementById('customer-form');form.addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(form));Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null});try{const r=await fetch('/api/customers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const body=await r.json().catch(()=>({}));if(!r.ok)throw new Error(body.message||'Não foi possível criar o cliente.');location.href='/customers/'+body.id}catch(err){const el=document.getElementById('error');el.textContent=err.message;el.style.display='block'}});</script></body></html>
