@@ -1,0 +1,18 @@
+<%- include('../partials/head', {title: 'Mercario — Editar cliente'}) %>
+<body><div class="page-shell"><div class="page-container"><main class="page-content">
+<%- include('../partials/detail-header', {title: 'Editar cliente', backHref: '/customers/'+customerId, menuHref: null}) %>
+<form id="customer-form" class="card-mercario form-card"><div id="loading" class="empty-state p-3">Carregando...</div><div id="fields" style="display:none">
+<div class="form-group mb-3"><label class="form-label">Nome completo</label><input id="name" name="name" class="form-control form-control-mercario" required maxlength="150"></div>
+<div class="form-group mb-3"><label class="form-label">Apelido <span class="fw-normal text-secondary">(opcional)</span></label><input id="nickname" name="nickname" class="form-control form-control-mercario" maxlength="150"></div>
+<div class="form-group mb-3"><label class="form-label">Telefone <span class="fw-normal text-secondary">(opcional)</span></label><input id="phone" name="phone" class="form-control form-control-mercario" maxlength="30"></div>
+<div class="form-group mb-3"><label class="form-label">E-mail <span class="fw-normal text-secondary">(opcional)</span></label><input id="email" name="email" type="email" class="form-control form-control-mercario" maxlength="180"></div>
+<div class="form-group mb-3"><label class="form-label">Endereço <span class="fw-normal text-secondary">(opcional)</span></label><input id="address" name="address" class="form-control form-control-mercario" maxlength="500"></div>
+<div class="form-group mb-3"><label class="form-label">Observações <span class="fw-normal text-secondary">(opcional)</span></label><textarea id="notes" name="notes" class="form-control form-control-mercario" rows="3" maxlength="1000"></textarea></div>
+<div id="error" class="error-message"></div><button class="btn-mercario mt-2" type="submit">Salvar alterações</button><button id="delete" type="button" class="btn-danger-mercario mt-2">Excluir cliente</button>
+</div></form></main></div></div>
+<script>
+const id=<%= JSON.stringify(customerId) %>;const fields=['name','nickname','phone','email','address','notes'];const error=document.getElementById('error');
+fetch('/api/customers/'+id).then(r=>r.ok?r.json():Promise.reject(new Error('Cliente não encontrado'))).then(c=>{fields.forEach(k=>document.getElementById(k).value=c[k]??'');loading.style.display='none';document.getElementById('fields').style.display='block'}).catch(e=>{loading.textContent=e.message});
+customer-form.addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null});try{const r=await fetch('/api/customers/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.message||'Não foi possível salvar.');location.href='/customers/'+id}catch(err){error.textContent=err.message;error.style.display='block'}});
+delete.onclick=async()=>{if(!confirm('Excluir este cliente?'))return;const r=await fetch('/api/customers/'+id,{method:'DELETE'});if(r.ok)location.href='/customers';else{const b=await r.json().catch(()=>({}));error.textContent=b.message||'Não foi possível excluir.';error.style.display='block'}};
+</script></body></html>
