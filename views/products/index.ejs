@@ -1,15 +1,7 @@
 <%- include('../partials/head', {title: 'Mercario — Produtos'}) %>
-<body id="pagina__produtos">
-  <div class="page-shell"><div class="page-container"><main class="page-content">
-    <div class="page-header"><h1 class="page-title">Produtos <span class="page-count">(<%= products.length %>)</span></h1></div>
-    <% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %>
-    <div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Pesquisar produto" aria-label="Pesquisar produto"></div>
-    <div class="card-mercario list-card">
-      <% if (!products.length) { %><div class="empty-state"><strong>Nenhum produto encontrado</strong>Cadastre produtos para começar a acompanhar seu catálogo.</div><% } %>
-      <% products.forEach(product => { const profit = product.costPriceCents != null ? product.priceCents - product.costPriceCents : null; %>
-        <div class="list-row"><div class="d-flex align-items-center gap-2"><div class="icon-badge"><i class="bi bi-box-seam-fill" aria-hidden="true"></i></div><div><p class="item-name"><%= product.name %></p><p class="item-sub"><%= product.description || 'Produto ativo' %></p></div></div><div class="text-end"><div class="price-tag">R$ <%= (product.priceCents / 100).toFixed(2).replace('.', ',') %></div><% if (profit !== null) { %><span class="stock-pill">Lucro: R$ <%= (profit / 100).toFixed(2).replace('.', ',') %></span><% } %></div></div>
-      <% }) %>
-    </div>
-  </main><%- include('../partials/bottom-nav', {active: 'products'}) %></div></div>
-</body>
-</html>
+<body id="pagina__produtos"><div class="page-shell"><div class="page-container"><main class="page-content">
+<div class="page-header"><h1 class="page-title">Produtos <span class="page-count">(<%= products.length %>)</span></h1><a href="/products/new" class="icon-button" aria-label="Novo produto"><i class="bi bi-plus-lg"></i></a></div>
+<% if (error) { %><div class="alert alert-mercario py-2"><%= error %></div><% } %><div class="search-box"><i class="bi bi-search" aria-hidden="true"></i><input type="search" placeholder="Pesquisar produto" aria-label="Pesquisar produto"></div>
+<div class="card-mercario list-card"><% if (!products.length) { %><div class="empty-state"><strong>Nenhum produto encontrado</strong>Cadastre produtos para começar a acompanhar seu catálogo.</div><% } %>
+<% products.forEach(product => { const profit = product.costPriceCents != null ? product.priceCents - product.costPriceCents : null; %><a href="/products/<%= product.id %>" class="list-row"><div class="d-flex align-items-center gap-2"><div class="icon-badge"><i class="bi bi-box-seam-fill" aria-hidden="true"></i></div><div><p class="item-name"><%= product.name %></p><p class="item-sub"><%= product.description || 'Produto ativo' %></p></div></div><div class="text-end"><div class="price-tag">R$ <%= (product.priceCents / 100).toFixed(2).replace('.', ',') %></div><% if (profit !== null) { %><span class="stock-pill">Lucro: R$ <%= (profit / 100).toFixed(2).replace('.', ',') %></span><% } %></div></a><% }) %></div>
+</main><%- include('../partials/bottom-nav', {active:'products'}) %></div></div></body></html>
