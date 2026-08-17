@@ -56,6 +56,10 @@ const CustomerController = {
     }
   },
   delete: async (req: Request, res: Response) => {
+    try { await CustomerService.delete(Number(req.params.id), getTenantId(req)); return res.status(204).send(); }
+    catch (error: unknown) { console.error(error); if (error instanceof AppError) return res.status(error.statusCode).json({message: error.message}); return res.status(500).json({message: 'Erro interno do servidor'}); }
+  },
+  pageList: async (req: Request, res: Response) => {
     try {
       await CustomerService.delete(Number(req.params.id), getTenantId(req));
       return res.status(204).send();
