@@ -41,19 +41,6 @@ const SalesController = {
   pageList: async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const result = await SalesService.findMany(tenantId, {page: 1, limit: 20});
-      const customers = await CustomerService.findAll(tenantId);
-      const customerMap = new Map(customers.map(customer => [customer.id, customer]));
-      const sales = result.data.map(sale => ({...sale.toJSON(), customer: customerMap.get(sale.customerId) ?? null}));
-      return res.render('sales/index', {sales, pagination: result.pagination, error: null});
-    } catch (error: unknown) {
-      console.error(error);
-      return res.status(500).render('sales/index', {sales: [], pagination: null, error: error instanceof Error ? error.message : 'Não foi possível carregar as vendas.'});
-    }
-  },
-  pageList: async (req: Request, res: Response) => {
-    try {
-      const tenantId = getTenantId(req);
       const result = await SalesService.findMany(tenantId, {
         page: 1,
         limit: 20,
