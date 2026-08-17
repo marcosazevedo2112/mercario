@@ -1,0 +1,9 @@
+<%- include('../partials/head', {title: 'Mercario — Produto'}) %>
+<body><div class="page-shell"><div class="page-container"><main class="page-content">
+<%- include('../partials/detail-header', {title: 'Produto', backHref: '/products', menuHref: null}) %>
+<div id="loading" class="empty-state">Carregando produto...</div><div id="content" style="display:none">
+<div class="card-mercario hero-card"><div class="hero-icon"><i class="bi bi-box-seam-fill"></i></div><p id="name" class="hero-name"></p><p id="price" class="hero-value"></p><p id="description" class="item-sub mt-1"></p></div>
+<div class="stat-grid-mercario"><div class="card-mercario stat-card-mercario"><p class="stat-label-mercario">Preço de custo</p><p id="cost" class="stat-value-mercario"></p></div><div class="card-mercario stat-card-mercario"><p class="stat-label-mercario">Margem</p><p id="margin" class="stat-value-mercario orange"></p></div></div>
+<a href="/products/<%= productId %>/edit" class="btn-mercario">Editar produto</a></div><div id="error" class="alert alert-mercario" style="display:none"></div>
+</main><%- include('../partials/bottom-nav', {active:'products'}) %></div></div>
+<script>const id=<%= JSON.stringify(productId) %>;const brl=v=>Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});fetch('/api/products/'+id).then(r=>r.ok?r.json():Promise.reject(new Error('Produto não encontrado'))).then(p=>{name.textContent=p.name;description.textContent=p.description||'Sem descrição';price.textContent=brl(p.priceCents);cost.textContent=brl(p.costPriceCents);margin.textContent=brl(p.priceCents-p.costPriceCents);loading.style.display='none';content.style.display='block'}).catch(e=>{loading.style.display='none';error.textContent=e.message;error.style.display='block'});</script></body></html>
