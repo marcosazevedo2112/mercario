@@ -1,0 +1,15 @@
+<%- include('../partials/head', {title: 'Mercario — Início'}) %>
+<body id="pagina__inicio">
+  <div class="page-shell"><div class="page-container"><main class="page-content">
+    <div class="mb-4"><p class="mb-1 text-secondary">Bom dia!</p><h1 class="page-title">Aqui está o resumo das suas vendas.</h1></div>
+    <div class="metric-card card-mercario"><p class="metric-label">Suas vendas este mês</p><div class="metric-row"><p class="metric-value"><%= stats.sales %></p><span class="metric-delta up"><%= stats.salesDelta %></span></div><p class="mini-note">comparado ao mês anterior</p></div>
+    <div class="metric-card card-mercario"><p class="metric-label">Lucro estimado para este mês</p><p class="metric-value"><%= stats.profit %></p><p class="mini-note">Aumentando sua margem</p></div>
+    <div class="mini-grid"><div class="mini-card card-mercario"><p class="mini-label">Clientes ativos</p><p class="mini-value"><%= stats.activeCustomers %></p><p class="mini-note">-10 comparado ao mês anterior</p></div><div class="mini-card card-mercario"><p class="mini-label">Produtos</p><p class="mini-value"><%= stats.products %></p></div></div>
+    <div class="section-label">Suas últimas vendas</div>
+    <div class="card-mercario list-card">
+      <% if (!recentSales.length) { %><div class="empty-state"><strong>Nenhuma venda recente</strong>Quando novas vendas forem registradas, elas aparecerão aqui.</div><% } %>
+      <% recentSales.forEach(sale => { %><div class="list-row"><div class="d-flex align-items-center gap-2"><div class="avatar-sm"><%= sale.initials %></div><div><p class="item-name"><%= sale.customer %></p><p class="item-sub"><%= sale.meta %></p></div></div><span class="price-tag"><%= sale.value %></span></div><% }) %>
+    </div>
+  </main><%- include('../partials/bottom-nav', {active: 'home'}) %></div></div>
+</body>
+</html>

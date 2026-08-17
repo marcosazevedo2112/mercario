@@ -1,0 +1,14 @@
+<nav class="bottom-nav" aria-label="Navegação principal">
+  <a class="nav-item <%= active === 'home' ? 'active' : '' %>" href="/">
+    <span class="nav-icon-wrap"><%- include('./icon', {name: 'home', size: 18}) %></span><span>Início</span>
+  </a>
+  <a class="nav-item <%= active === 'sales' ? 'active' : '' %>" href="/sales">
+    <span class="nav-icon-wrap"><%- include('./icon', {name: 'cart', size: 18}) %></span><span>Vendas</span>
+  </a>
+  <a class="nav-item <%= active === 'customers' ? 'active' : '' %>" href="/customers">
+    <span class="nav-icon-wrap"><%- include('./icon', {name: 'people', size: 18}) %></span><span>Clientes</span>
+  </a>
+  <a class="nav-item <%= active === 'products' ? 'active' : '' %>" href="/products">
+    <span class="nav-icon-wrap"><%- include('./icon', {name: 'box', size: 18}) %></span><span>Produtos</span>
+  </a>
+</nav>
