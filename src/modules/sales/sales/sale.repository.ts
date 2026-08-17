@@ -52,7 +52,7 @@ interface CreateSaleData {
 
 const includes = [
   {model: SaleItem, as: 'items'},
-  {model: Installment, as: 'installments'},
+  {model: Installment, as: 'Saleinstallments'},
   {model: Settlement, as: 'settlement'},
 ];
 
