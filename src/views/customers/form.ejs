@@ -1,0 +1,42 @@
+<div class="mb-4">
+  <a href="<%= isEdit ? '/customers/' + customer.id : '/customers' %>" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+  <h1 class="h4 fw-bold mt-2 mb-1"><%= isEdit ? 'Editar cliente' : 'Novo cliente' %></h1>
+  <p class="text-muted small mb-0"><%= isEdit ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente' %></p>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form action="<%= isEdit ? '/customers/' + customer.id + '/edit' : '/customers' %>" method="POST" data-prevent-double novalidate>
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label for="name" class="form-label fw-medium">Nome <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="name" name="name" value="<%= isEdit ? customer.name : (typeof formData!=='undefined'&&formData?formData.name:'') %>" required maxlength="150" placeholder="Nome completo">
+        </div>
+        <div class="col-md-4">
+          <label for="nickname" class="form-label fw-medium">Apelido</label>
+          <input type="text" class="form-control" id="nickname" name="nickname" value="<%= isEdit ? (customer.nickname||'') : (typeof formData!=='undefined'&&formData?formData.nickname:'') %>" maxlength="150" placeholder="Como chama">
+        </div>
+        <div class="col-md-6">
+          <label for="phone" class="form-label fw-medium">Telefone</label>
+          <input type="tel" class="form-control" id="phone" name="phone" value="<%= isEdit ? (customer.phone||'') : (typeof formData!=='undefined'&&formData?formData.phone:'') %>" maxlength="30" placeholder="(11) 99999-9999">
+        </div>
+        <div class="col-md-6">
+          <label for="email" class="form-label fw-medium">E-mail</label>
+          <input type="email" class="form-control" id="email" name="email" value="<%= isEdit ? (customer.email||'') : (typeof formData!=='undefined'&&formData?formData.email:'') %>" maxlength="180" placeholder="cliente@email.com">
+        </div>
+        <div class="col-12">
+          <label for="address" class="form-label fw-medium">Endereço</label>
+          <input type="text" class="form-control" id="address" name="address" value="<%= isEdit ? (customer.address||'') : (typeof formData!=='undefined'&&formData?formData.address:'') %>" maxlength="500" placeholder="Rua, número, bairro, cidade">
+        </div>
+        <div class="col-12">
+          <label for="notes" class="form-label fw-medium">Observações</label>
+          <textarea class="form-control" id="notes" name="notes" rows="3" maxlength="1000" placeholder="Anotações sobre o cliente"><%= isEdit ? (customer.notes||'') : (typeof formData!=='undefined'&&formData?formData.notes:'') %></textarea>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-dark px-4"><%= isEdit ? 'Salvar alterações' : 'Cadastrar cliente' %></button>
+        <a href="<%= isEdit ? '/customers/' + customer.id : '/customers' %>" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

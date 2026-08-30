@@ -1,0 +1,136 @@
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="h4 fw-bold mb-1">Vendas</h1>
+    <p class="text-muted small mb-0"><%= pagination.total %> venda(s) no total</p>
+  </div>
+  <a href="/sales/new" class="btn btn-dark"><i class="bi bi-plus-lg me-1"></i> Nova venda</a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Buscar</label>
+        <input type="search" name="search" value="<%= search %>" placeholder="ID da venda" class="form-control form-control-sm">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-medium">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">Todos</option>
+          <option value="OPEN" <%= status==='OPEN'?'selected':'' %>>Aberta</option>
+          <option value="COMPLETED" <%= status==='COMPLETED'?'selected':'' %>>Concluída</option>
+          <option value="CANCELED" <%= status==='CANCELED'?'selected':'' %>>Cancelada</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-medium">Cliente</label>
+        <select name="customerId" class="form-select form-select-sm">
+          <option value="">Todos os clientes</option>
+          <% customers.forEach(function(c){ %>
+            <option value="<%= c.id %>" <%= String(customerId)===String(c.id)?'selected':'' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-dark btn-sm flex-fill">Filtrar</button>
+        <a href="/sales" class="btn btn-outline-secondary btn-sm">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Agenda financeira -->
+<% if (agenda && agenda.length > 0) { %>
+<div class="card mb-4">
+  <div class="card-header bg-white d-flex align-items-center gap-2">
+    <i class="bi bi-calendar-week"></i>
+    <span class="fw-semibold small">Agenda de recebimentos</span>
+    <span class="text-muted small">— parcelas pendentes agrupadas por vencimento</span>
+  </div>
+  <div class="card-body">
+    <div class="row g-3">
+      <% agenda.forEach(function(group){ %>
+        <% const isToday = group.date === today; const isOverdue = group.date < today; %>
+        <div class="col-md-6 col-lg-4">
+          <div class="border rounded-3 p-3 h-100 <%= isOverdue ? 'border-danger bg-danger bg-opacity-10' : isToday ? 'border-dark' : '' %>">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge <%= isOverdue ? 'bg-danger' : isToday ? 'bg-dark' : 'bg-secondary' %>"><%= group.date.split('-').reverse().join('/') %></span>
+              <% if(isToday){ %><span class="small fw-semibold">Hoje</span><% } %>
+              <% if(isOverdue){ %><span class="small text-danger fw-semibold">Vencido</span><% } %>
+              <span class="small text-muted ms-auto"><%= group.items.length %> parcela(s)</span>
+            </div>
+            <div class="d-flex flex-column gap-1">
+              <% group.items.forEach(function(inst){ %>
+                <div class="d-flex justify-content-between align-items-center small border-bottom py-1">
+                  <span>Venda #<%= inst.saleId %> · Parcela <%= inst.number %>/<%= inst.sale.installments || '?' %> </span>
+                  <span class="fw-semibold"><%= (inst.amountCents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) %></span>
+                </div>
+              <% }) %>
+            </div>
+            <div class="small text-muted mt-2">Total: <%= (group.items.reduce((s,i)=>s+(i.amountCents||0),0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<!-- Lista de vendas -->
+<% if (!sales || sales.length === 0) { %>
+  <div class="card"><div class="empty-state">
+    <div class="icon"><i class="bi bi-receipt"></i></div>
+    <p class="fw-medium mb-1">Nenhuma venda encontrada</p>
+    <p class="small text-muted mb-3">Ajuste os filtros ou crie uma nova venda.</p>
+    <a href="/sales/new" class="btn btn-dark btn-sm">Nova venda</a>
+  </div></div>
+<% } else { %>
+  <% const custMap = {}; customers.forEach(function(c){ custMap[c.id]=c.name; }); %>
+  <div class="card overflow-hidden d-none d-md-block">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr><th>Venda</th><th>Cliente</th><th>Valor</th><th>Status</th><th>Data</th><th class="text-end">Ação</th></tr>
+        </thead>
+        <tbody>
+          <% sales.forEach(function(s){ %>
+            <tr>
+              <td><a href="/sales/<%= s.id %>" class="fw-semibold text-dark text-decoration-none">#<%= s.id %></a><div class="small text-muted"><%= s.installments %>x · <%= s.paymentMethod %></div></td>
+              <td class="small"><%= custMap[s.customerId] || ('Cliente #' + s.customerId) %></td>
+              <td class="fw-semibold"><%= (s.totalCents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) %></td>
+              <td>
+                <% if(s.status==='OPEN'){ %><span class="badge bg-warning text-dark">Aberta</span><% } %>
+                <% if(s.status==='COMPLETED'){ %><span class="badge bg-success">Concluída</span><% } %>
+                <% if(s.status==='CANCELED'){ %><span class="badge bg-danger">Cancelada</span><% } %>
+              </td>
+              <td class="small text-muted"><%= new Date(s.createdAt).toLocaleDateString('pt-BR') %></td>
+              <td class="text-end"><a href="/sales/<%= s.id %>" class="btn btn-sm btn-outline-secondary">Ver</a></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <!-- Mobile cards -->
+  <div class="d-md-none d-flex flex-column gap-3">
+    <% sales.forEach(function(s){ %>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <a href="/sales/<%= s.id %>" class="fw-bold text-dark text-decoration-none">Venda #<%= s.id %></a>
+            <% if(s.status==='OPEN'){ %><span class="badge bg-warning text-dark">Aberta</span><% } %>
+            <% if(s.status==='COMPLETED'){ %><span class="badge bg-success">Concluída</span><% } %>
+            <% if(s.status==='CANCELED'){ %><span class="badge bg-danger">Cancelada</span><% } %>
+          </div>
+          <div class="small text-muted mb-1"><%= custMap[s.customerId] || ('Cliente #' + s.customerId) %> · <%= new Date(s.createdAt).toLocaleDateString('pt-BR') %></div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold"><%= (s.totalCents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) %></span>
+            <a href="/sales/<%= s.id %>" class="btn btn-sm btn-dark">Ver detalhe</a>
+          </div>
+        </div>
+      </div>
+    <% }) %>
+  </div>
+  <%- include('../partials/_pagination') %>
+<% } %>

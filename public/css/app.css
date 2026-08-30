@@ -1,0 +1,18 @@
+:root {
+  --mercario-primary: #111827;
+  --mercario-accent: #059669;
+  --mercario-bg: #f9fafb;
+}
+body { background: var(--mercario-bg); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+.sidebar { width: 240px; min-height: 100vh; }
+.sidebar .nav-link.active { background: #111827; color: #fff !important; border-radius: 8px; }
+.sidebar .nav-link { color: #374151; border-radius: 8px; }
+.main-content { margin-left: 240px; }
+@media (max-width: 991px) { .sidebar { display: none !important; } .main-content { margin-left: 0; } }
+.card { border: 1px solid #e5e7eb; border-radius: 12px; }
+.btn-primary { background: var(--mercario-primary); border-color: var(--mercario-primary); }
+.btn-primary:hover { background: #1f2937; }
+.text-muted-2 { color: #6b7280; }
+.empty-state { padding: 48px 24px; text-align: center; color: #6b7280; }
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+.badge-status { font-weight: 600; font-size: 0.75rem; letter-spacing: 0.02em; }

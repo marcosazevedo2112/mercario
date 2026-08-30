@@ -139,9 +139,9 @@ const SalesService = {
         'Não é possível registrar pagamento em uma venda encerrada',
         400,
       );
-    const installment = sale.installments.find(
-      item => item.id === installmentId,
-    );
+    const installment = (
+      sale as unknown as {Saleinstallments: Array<{id: number; status: string}>}
+    ).Saleinstallments.find(item => item.id === installmentId);
     if (!installment) throw new AppError('Parcela não encontrada', 404);
     if (installment.status !== InstallmentStatus.PENDING)
       throw new AppError('A parcela não está pendente', 400);

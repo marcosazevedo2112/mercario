@@ -1,0 +1,228 @@
+<div class="mb-4">
+  <a href="/sales" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Vendas</a>
+  <h1 class="h4 fw-bold mt-2 mb-1">Nova venda</h1>
+  <p class="text-muted small mb-0">Selecione cliente, produtos e forma de pagamento</p>
+</div>
+
+<form id="saleForm" action="/sales" method="POST" data-prevent-double novalidate>
+  <!-- Cliente -->
+  <div class="card mb-3">
+    <div class="card-header bg-white fw-semibold"><span class="badge bg-dark me-2">1</span> Cliente</div>
+    <div class="card-body">
+      <label for="customerId" class="form-label fw-medium">Cliente <span class="text-danger">*</span></label>
+      <select id="customerId" name="customerId" class="form-select" required>
+        <option value="">Selecione um cliente</option>
+        <% customers.forEach(function(c){ %>
+          <option value="<%= c.id %>" <%= (typeof preselectedCustomerId !== 'undefined' && String(preselectedCustomerId)===String(c.id)) ? 'selected' : '' %>><%= c.name %><%= c.nickname ? ' ('+c.nickname+')' : '' %><%= c.phone ? ' — ' + c.phone : '' %></option>
+        <% }) %>
+      </select>
+      <% if(customers.length===0){ %><div class="small text-muted mt-2">Nenhum cliente ativo. <a href="/customers/new">Cadastrar cliente</a></div><% } %>
+    </div>
+  </div>
+
+  <!-- Produtos -->
+  <div class="card mb-3">
+    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+      <span class="fw-semibold"><span class="badge bg-dark me-2">2</span> Produtos</span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" id="addItemBtn"><i class="bi bi-plus-lg"></i> Adicionar item</button>
+    </div>
+    <div class="card-body">
+      <div id="itemsContainer" class="d-flex flex-column gap-3"></div>
+      <div id="emptyItems" class="text-center text-muted small py-3 border rounded-3 border-dashed">Nenhum produto adicionado ainda.</div>
+      <!-- Resumo -->
+      <div class="border-top mt-3 pt-3">
+        <div class="d-flex justify-content-between small"><span>Subtotal</span><span id="subtotalLabel" class="fw-semibold">R$ 0,00</span></div>
+        <div class="d-flex justify-content-between small align-items-center mt-2">
+          <label for="discount" class="mb-0">Desconto (R$)</label>
+          <input type="text" id="discount" name="discount" value="0,00" class="form-control form-control-sm text-end" style="max-width:140px;" placeholder="0,00">
+        </div>
+        <div class="d-flex justify-content-between fw-bold mt-2 pt-2 border-top"><span>Total</span><span id="totalLabel">R$ 0,00</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagamento -->
+  <div class="card mb-3">
+    <div class="card-header bg-white fw-semibold"><span class="badge bg-dark me-2">3</span> Pagamento</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="paymentMethod" class="form-label fw-medium">Método <span class="text-danger">*</span></label>
+          <select id="paymentMethod" name="paymentMethod" class="form-select" required>
+            <option value="PIX">PIX</option>
+            <option value="BOLETO">Boleto</option>
+            <option value="CREDIT_CARD">Cartão de crédito</option>
+            <option value="DEBIT_CARD">Cartão de débito</option>
+            <option value="CASH">Dinheiro</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label for="installments" class="form-label fw-medium">Parcelas <span class="text-danger">*</span></label>
+          <input type="number" id="installments" name="installments" class="form-control" min="1" value="1" required>
+        </div>
+        <div class="col-md-3">
+          <label for="modality" class="form-label fw-medium">Modalidade <span class="text-danger">*</span></label>
+          <select id="modality" name="modality" class="form-select" required>
+            <option value="ONCE">À vista</option>
+            <option value="WEEKLY">Semanal</option>
+            <option value="MONTHLY" selected>Mensal</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label for="initialDueDate" class="form-label fw-medium">1º vencimento <span class="text-danger">*</span></label>
+          <input type="date" id="initialDueDate" name="initialDueDate" class="form-control" value="<%= new Date().toISOString().slice(0,10) %>" required>
+        </div>
+      </div>
+      <div class="small text-muted mt-2">À vista exige exatamente 1 parcela.</div>
+    </div>
+  </div>
+
+  <!-- Observações -->
+  <div class="card mb-4">
+    <div class="card-header bg-white fw-semibold"><span class="badge bg-dark me-2">4</span> Observações</div>
+    <div class="card-body">
+      <textarea name="notes" rows="2" maxlength="500" class="form-control" placeholder="Observações opcionais (máx. 500 caracteres)"></textarea>
+    </div>
+  </div>
+
+  <!-- Confirmação -->
+  <div class="card mb-4 border-dark">
+    <div class="card-body d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <div class="fw-semibold">Revise antes de confirmar</div>
+        <div class="small text-muted">A venda será criada e confirmada imediatamente.</div>
+      </div>
+      <button type="submit" class="btn btn-dark btn-lg px-4" id="submitBtn"><i class="bi bi-check-lg me-1"></i> Confirmar venda</button>
+    </div>
+  </div>
+
+  <!-- Hidden JSON fallback -->
+  <input type="hidden" name="items" id="itemsJson">
+</form>
+
+<!-- Template row (hidden) -->
+<template id="itemRowTemplate">
+  <div class="item-row border rounded-3 p-3">
+    <div class="row g-2 align-items-end">
+      <div class="col-md-6">
+        <label class="form-label small fw-medium">Produto</label>
+        <select class="form-select product-select" required>
+          <option value="">Selecione</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-medium">Qtd</label>
+        <input type="number" class="form-control qty-input" min="1" value="1" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small fw-medium">Preço</label>
+        <div class="price-label small fw-semibold text-success">—</div>
+      </div>
+      <div class="col-md-2 d-flex gap-2 align-items-end">
+        <div class="flex-fill">
+          <label class="form-label small fw-medium">Subtotal</label>
+          <div class="subtotal-label small fw-bold">—</div>
+        </div>
+        <button type="button" class="btn btn-outline-danger btn-sm remove-row" title="Remover"><i class="bi bi-trash"></i></button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+(function(){
+  var products = <%- JSON.stringify(products.map(function(p){ return {id:p.id, name:p.name, priceCents:p.priceCents}; })) %>;
+  var productMap = {};
+  products.forEach(function(p){ productMap[p.id]=p; });
+  var container = document.getElementById('itemsContainer');
+  var emptyMsg = document.getElementById('emptyItems');
+  var subtotalLabel = document.getElementById('subtotalLabel');
+  var totalLabel = document.getElementById('totalLabel');
+  var discountInput = document.getElementById('discount');
+  var itemsJson = document.getElementById('itemsJson');
+  var installmentsInput = document.getElementById('installments');
+  var modalitySelect = document.getElementById('modality');
+
+  function brl(cents){ return (cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
+  function parseBRL(str){
+    if(!str) return 0;
+    var s = String(str).trim().replace(/\./g,'').replace(',','.');
+    var n = Number(s);
+    return isNaN(n) ? 0 : Math.round(n*100);
+  }
+
+  function createRow(){
+    var tpl = document.getElementById('itemRowTemplate');
+    var clone = tpl.content.cloneNode(true);
+    var row = clone.querySelector('.item-row');
+    var select = row.querySelector('.product-select');
+    products.forEach(function(p){
+      var opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name + ' — ' + brl(p.priceCents);
+      select.appendChild(opt);
+    });
+    row.querySelector('.remove-row').addEventListener('click', function(){ row.remove(); refresh(); });
+    select.addEventListener('change', refresh);
+    row.querySelector('.qty-input').addEventListener('input', refresh);
+    container.appendChild(row);
+    refresh();
+  }
+
+  function refresh(){
+    var rows = container.querySelectorAll('.item-row');
+    emptyMsg.style.display = rows.length ? 'none' : 'block';
+    var subtotal = 0;
+    var items = [];
+    rows.forEach(function(row){
+      var pid = Number(row.querySelector('.product-select').value);
+      var qty = Math.max(1, Number(row.querySelector('.qty-input').value)||1);
+      var priceLabel = row.querySelector('.price-label');
+      var subLabel = row.querySelector('.subtotal-label');
+      if(pid && productMap[pid]){
+        var price = productMap[pid].priceCents;
+        var sub = price * qty;
+        priceLabel.textContent = brl(price);
+        subLabel.textContent = brl(sub);
+        subtotal += sub;
+        items.push({productId: pid, quantity: qty});
+      } else {
+        priceLabel.textContent = '—';
+        subLabel.textContent = '—';
+      }
+    });
+    subtotalLabel.textContent = brl(subtotal);
+    var discount = parseBRL(discountInput.value);
+    var total = Math.max(0, subtotal - discount);
+    totalLabel.textContent = brl(total);
+    itemsJson.value = JSON.stringify(items);
+    // ONCE guard
+    if(modalitySelect.value === 'ONCE' && Number(installmentsInput.value) !== 1){
+      installmentsInput.setCustomValidity('Modalidade À vista exige exatamente 1 parcela');
+    } else {
+      installmentsInput.setCustomValidity('');
+    }
+  }
+
+  document.getElementById('addItemBtn').addEventListener('click', createRow);
+  discountInput.addEventListener('input', refresh);
+  installmentsInput.addEventListener('input', refresh);
+  modalitySelect.addEventListener('change', refresh);
+
+  document.getElementById('saleForm').addEventListener('submit', function(e){
+    refresh();
+    var rows = container.querySelectorAll('.item-row');
+    if(rows.length === 0){ e.preventDefault(); showToast('Adicione ao menos um produto','error'); return; }
+    var hasInvalid = false;
+    rows.forEach(function(row){
+      if(!row.querySelector('.product-select').value) hasInvalid = true;
+    });
+    if(hasInvalid){ e.preventDefault(); showToast('Selecione o produto em todos os itens','error'); return; }
+    var items = JSON.parse(itemsJson.value || '[]');
+    if(items.length === 0){ e.preventDefault(); showToast('Adicione ao menos um produto','error'); }
+  });
+
+  // start with one row
+  if(products.length>0) createRow();
+})();
+</script>

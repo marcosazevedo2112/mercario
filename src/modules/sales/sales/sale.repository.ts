@@ -10,8 +10,9 @@ import {PaymentModality} from './enums/payment-modality';
 
 type SaleWithRelations = Sale & {
   items: SaleItem[];
-  installments: Installment[];
+  Saleinstallments: Installment[];
   settlement?: Settlement | null;
+  // `installments` is the INTEGER column (quantity), not the association
 };
 interface CreateSaleData {
   sale: {
@@ -52,7 +53,7 @@ interface CreateSaleData {
 
 const includes = [
   {model: SaleItem, as: 'items'},
-  {model: Installment, as: 'installments'},
+  {model: Installment, as: 'Saleinstallments'},
   {model: Settlement, as: 'settlement'},
 ];
 

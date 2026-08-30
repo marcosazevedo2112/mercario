@@ -1,0 +1,20 @@
+<% if (typeof pagination !== 'undefined' && pagination && pagination.totalPages > 1) { %>
+<nav aria-label="Paginação" class="mt-4">
+  <ul class="pagination justify-content-center mb-0">
+    <li class="page-item <%= pagination.page <= 1 ? 'disabled' : '' %>">
+      <a class="page-link" href="?<%= typeof queryString !== 'undefined' ? queryString(pagination.page - 1) : 'page='+(pagination.page-1) %>">Anterior</a>
+    </li>
+    <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+      <% if (p === 1 || p === pagination.totalPages || (p >= pagination.page - 2 && p <= pagination.page + 2)) { %>
+        <li class="page-item <%= p === pagination.page ? 'active' : '' %>"><a class="page-link" href="?<%= typeof queryString !== 'undefined' ? queryString(p) : 'page='+p %>"><%= p %></a></li>
+      <% } else if (p === pagination.page - 3 || p === pagination.page + 3) { %>
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+      <% } %>
+    <% } %>
+    <li class="page-item <%= pagination.page >= pagination.totalPages ? 'disabled' : '' %>">
+      <a class="page-link" href="?<%= typeof queryString !== 'undefined' ? queryString(pagination.page + 1) : 'page='+(pagination.page+1) %>">Próxima</a>
+    </li>
+  </ul>
+  <p class="text-center small text-muted mt-2"><%= pagination.total %> registro(s) no total</p>
+</nav>
+<% } %>

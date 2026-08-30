@@ -1,0 +1,41 @@
+<div class="mb-4">
+  <a href="<%= isEdit ? '/products/' + product.id : '/products' %>" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+  <h1 class="h4 fw-bold mt-2 mb-1"><%= isEdit ? 'Editar produto' : 'Novo produto' %></h1>
+  <p class="text-muted small mb-0"><%= isEdit ? 'Atualize os dados do produto' : 'Cadastre um novo produto' %></p>
+</div>
+
+<div class="card">
+  <div class="card-body p-4">
+    <form action="<%= isEdit ? '/products/' + product.id + '/edit' : '/products' %>" method="POST" data-prevent-double novalidate>
+      <div class="mb-3">
+        <label for="name" class="form-label fw-medium">Nome <span class="text-danger">*</span></label>
+        <input type="text" class="form-control" id="name" name="name" value="<%= isEdit ? product.name : (typeof formData!=='undefined'&&formData?formData.name:'') %>" required maxlength="150" placeholder="Ex: Camiseta básica">
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label fw-medium">Descrição</label>
+        <textarea class="form-control" id="description" name="description" rows="2" maxlength="500" placeholder="Detalhes opcionais"><%= isEdit ? (product.description||'') : (typeof formData!=='undefined'&&formData?formData.description:'') %></textarea>
+      </div>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <label for="price" class="form-label fw-medium">Preço de venda (R$) <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" id="price" name="price" value="<%= isEdit ? (product.priceCents/100).toFixed(2).replace('.',',') : (typeof formData!=='undefined'&&formData?formData.price:'') %>" placeholder="19,90" required>
+          <div class="form-text">Use vírgula como separador decimal</div>
+        </div>
+        <div class="col-md-6">
+          <label for="costPrice" class="form-label fw-medium">Preço de custo (R$)</label>
+          <input type="text" class="form-control" id="costPrice" name="costPrice" value="<%= isEdit ? (product.costPriceCents/100).toFixed(2).replace('.',',') : (typeof formData!=='undefined'&&formData?formData.costPrice:'') %>" placeholder="10,00">
+        </div>
+      </div>
+      <% if(isEdit){ %>
+        <div class="mb-3 form-check">
+          <input class="form-check-input" type="checkbox" id="active" name="active" value="true" <%= product.active ? 'checked' : '' %>>
+          <label class="form-check-label" for="active">Produto ativo</label>
+        </div>
+      <% } %>
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-dark px-4"><%= isEdit ? 'Salvar alterações' : 'Cadastrar produto' %></button>
+        <a href="<%= isEdit ? '/products/' + product.id : '/products' %>" class="btn btn-outline-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,52 @@
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+  <div>
+    <h1 class="h4 fw-bold mb-1">Clientes</h1>
+    <p class="text-muted small mb-0"><%= customers.length %> cliente(s)</p>
+  </div>
+  <a href="/customers/new" class="btn btn-dark"><i class="bi bi-person-plus me-1"></i> Novo cliente</a>
+</div>
+
+<form method="GET" class="mb-3">
+  <div class="input-group" style="max-width:400px;">
+    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+    <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Buscar por nome, apelido, telefone ou e-mail" class="form-control">
+    <button class="btn btn-outline-secondary">Buscar</button>
+  </div>
+</form>
+
+<% if (!customers || customers.length === 0) { %>
+  <div class="card"><div class="empty-state">
+    <div class="icon"><i class="bi bi-people"></i></div>
+    <p class="fw-medium mb-1">Nenhum cliente encontrado</p>
+    <p class="small text-muted mb-3">Cadastre seu primeiro cliente para começar.</p>
+    <a href="/customers/new" class="btn btn-dark btn-sm">Cadastrar cliente</a>
+  </div></div>
+<% } else { %>
+  <div class="card overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>Cliente</th><th>Contato</th><th>Status</th><th class="text-end">Ações</th></tr></thead>
+        <tbody>
+          <% customers.forEach(function(c){ %>
+            <tr>
+              <td>
+                <a href="/customers/<%= c.id %>" class="fw-medium text-dark text-decoration-none"><%= c.name %></a>
+                <% if(c.nickname){ %><div class="small text-muted"><%= c.nickname %></div><% } %>
+              </td>
+              <td>
+                <% if(c.phone){ %><div class="small"><i class="bi bi-telephone me-1"></i><%= c.phone %></div><% } %>
+                <% if(c.email){ %><div class="small text-muted"><%= c.email %></div><% } %>
+                <% if(!c.phone && !c.email){ %><span class="small text-muted">—</span><% } %>
+              </td>
+              <td><span class="badge <%= c.active ? 'bg-success' : 'bg-secondary' %>"><%= c.active ? 'Ativo' : 'Inativo' %></span></td>
+              <td class="text-end">
+                <a href="/customers/<%= c.id %>" class="btn btn-sm btn-outline-secondary">Ver</a>
+                <a href="/customers/<%= c.id %>/edit" class="btn btn-sm btn-outline-primary">Editar</a>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+<% } %>

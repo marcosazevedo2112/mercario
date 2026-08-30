@@ -20,9 +20,12 @@ const SettlementService = {
     if (sale.status !== SaleStatus.OPEN)
       throw new AppError('A venda não pode ser quitada', 400);
 
-    const remaining = sale.installments
-      .filter(item => item.status === InstallmentStatus.PENDING)
-      .reduce((sum, item) => sum + item.amountCents, 0);
+    const remaining = (
+      sale as unknown as {Saleinstallments: Array<{status: string; amountCents: number}>}
+    ).Saleinstallments.filter(item => item.status === InstallmentStatus.PENDING).reduce(
+      (sum, item) => sum + item.amountCents,
+      0,
+    );
 
     if (remaining <= 0)
       throw new AppError('A venda não possui saldo pendente', 400);
