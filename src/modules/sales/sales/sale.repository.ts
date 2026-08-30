@@ -9,19 +9,10 @@ import {InstallmentStatus} from './enums/installment-status';
 import {PaymentMethod} from './enums/payment-method';
 import {PaymentModality} from './enums/payment-modality';
 
-type SaleWithRelations = Sale & {items: SaleItem[]; installments: Installment[]; settlement?: Settlement | null; customer?: Customer | null};
+type SaleWithRelations = Sale & {items: SaleItem[]; installments?: Installment[]; Saleinstallments: Installment[]; settlement?: Settlement | null; customer?: Customer | null};
 type Receivable = Installment & {sale: Sale & {customer: Customer | null; Saleinstallments?: Installment[]}};
-interface CreateSaleData {
-  sale: {tenantId: number; customerId: number; subtotalCents: number; discountCents: number; totalCents: number; paymentMethod: PaymentMethod; installments: number; initialDueDate: Date; modality: PaymentModality; notes: string | null; status: SaleStatus; createdBy: number; confirmedAt: Date};
-  items: Array<{tenantId: number; productId: number; productName: string; quantity: number; unitPriceCents: number; subtotalCents: number}>;
-  installments: Array<{tenantId: number; number: number; amountCents: number; paidAmountCents: number; dueDate: Date; status: InstallmentStatus; paidAt: Date | null; settlementId: number | null; notes: string | null}>;
-}
-const includes = [
-  {model: SaleItem, as: 'items'},
-  {model: Installment, as: 'Saleinstallments'},
-  {model: Settlement, as: 'settlement'},
-  {model: Customer, as: 'customer'},
-];
+interface CreateSaleData {sale: {tenantId: number; customerId: number; subtotalCents: number; discountCents: number; totalCents: number; paymentMethod: PaymentMethod; installments: number; initialDueDate: Date; modality: PaymentModality; notes: string | null; status: SaleStatus; createdBy: number; confirmedAt: Date}; items: Array<{tenantId: number; productId: number; productName: string; quantity: number; unitPriceCents: number; subtotalCents: number}>; installments: Array<{tenantId: number; number: number; amountCents: number; paidAmountCents: number; dueDate: Date; status: InstallmentStatus; paidAt: Date | null; settlementId: number | null; notes: string | null}>;}
+const includes = [{model: SaleItem, as: 'items'}, {model: Installment, as: 'Saleinstallments'}, {model: Settlement, as: 'settlement'}, {model: Customer, as: 'customer'}];
 const SaleRepository = {
   create: async (data: CreateSaleData, transaction: Transaction): Promise<Sale> => {const sale = await Sale.create(data.sale, {transaction}); await SaleItem.bulkCreate(data.items.map(item => ({...item, saleId: sale.id})), {transaction}); await Installment.bulkCreate(data.installments.map(item => ({...item, saleId: sale.id})), {transaction}); return sale;},
   findById: async (saleId: number, tenantId: number, transaction?: Transaction): Promise<SaleWithRelations | null> => Sale.findOne({where: {id: saleId, tenantId}, include: includes, transaction}) as Promise<SaleWithRelations | null>,
