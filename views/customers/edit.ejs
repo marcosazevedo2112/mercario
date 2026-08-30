@@ -11,8 +11,81 @@
 <div id="error" class="error-message"></div><button class="btn-mercario mt-2" type="submit">Salvar alterações</button><button id="delete" type="button" class="btn-danger-mercario mt-2">Excluir cliente</button>
 </div></form></main></div></div>
 <script>
-const id=<%= JSON.stringify(customerId) %>;const fields=['name','nickname','phone','email','address','notes'];const error=document.getElementById('error');
-fetch('/api/customers/'+id).then(r=>r.ok?r.json():Promise.reject(new Error('Cliente não encontrado'))).then(c=>{fields.forEach(k=>document.getElementById(k).value=c[k]??'');loading.style.display='none';document.getElementById('fields').style.display='block'}).catch(e=>{loading.textContent=e.message});
-customer-form.addEventListener('submit',async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.target));Object.keys(data).forEach(k=>{if(data[k]==='')data[k]=null});try{const r=await fetch('/api/customers/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.message||'Não foi possível salvar.');location.href='/customers/'+id}catch(err){error.textContent=err.message;error.style.display='block'}});
-delete.onclick=async()=>{if(!confirm('Excluir este cliente?'))return;const r=await fetch('/api/customers/'+id,{method:'DELETE'});if(r.ok)location.href='/customers';else{const b=await r.json().catch(()=>({}));error.textContent=b.message||'Não foi possível excluir.';error.style.display='block'}};
+const id = <%= customerId %>;
+const fields = ['name', 'nickname', 'phone', 'email', 'address', 'notes'];
+const form = document.getElementById('customer-form');
+const error = document.getElementById('error');
+const deleteBtn = document.getElementById('delete');
+
+fetch('/api/customers/' + encodeURIComponent(id))
+  .then(r => r.ok ? r.json() : r.json().then(e => Promise.reject(new Error(e.message || 'Cliente não encontrado'))))
+  .then(c => {
+    fields.forEach(k => {
+      const el = document.getElementById(k);
+      if (el) el.value = c[k] ?? '';
+    });
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('fields').style.display = 'block';
+  })
+  .catch(e => {
+    document.getElementById('loading').textContent = e.message;
+  });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  error.style.display = 'none';
+  const data = Object.fromEntries(new FormData(form));
+
+  if (!data.name || data.name.trim().length < 2) {
+    error.textContent = 'Nome do cliente deve ter pelo menos 2 caracteres';
+    error.style.display = 'block';
+    return;
+  }
+  if (data.name.trim().length > 150) {
+    error.textContent = 'Nome do cliente muito longo';
+    error.style.display = 'block';
+    return;
+  }
+  if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    error.textContent = 'E-mail inválido';
+    error.style.display = 'block';
+    return;
+  }
+
+  Object.keys(data).forEach(k => {
+    if (typeof data[k] === 'string') data[k] = data[k].trim();
+    if (data[k] === '') data[k] = null;
+  });
+
+  try {
+    const r = await fetch('/api/customers/' + encodeURIComponent(id), {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const b = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(b.message || 'Não foi possível salvar.');
+    location.href = '/customers/' + id;
+  } catch (err) {
+    error.textContent = err.message;
+    error.style.display = 'block';
+  }
+});
+
+deleteBtn.onclick = async () => {
+  if (!confirm('Excluir este cliente?')) return;
+  try {
+    const r = await fetch('/api/customers/' + encodeURIComponent(id), {method: 'DELETE'});
+    if (r.ok) {
+      location.href = '/customers';
+    } else {
+      const b = await r.json().catch(() => ({}));
+      error.textContent = b.message || 'Não foi possível excluir.';
+      error.style.display = 'block';
+    }
+  } catch (err) {
+    error.textContent = 'Erro ao conectar ao servidor.';
+    error.style.display = 'block';
+  }
+};
 </script></body></html>

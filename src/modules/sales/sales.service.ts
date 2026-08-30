@@ -10,6 +10,7 @@ import {CreateSaleDTO} from './schemas/create.sales';
 import SettlementService from './sales/settlement.service';
 import {PaymentMethod} from './sales/enums/payment-method';
 import {SaleAggregate} from './sales/sale.aggregate';
+import Installment from './sales/entities/installment.model';
 
 const SalesService = {
   create: async (data: CreateSaleDTO, tenantId: number, createdBy: number) => {
@@ -133,15 +134,14 @@ const SalesService = {
     paidAt: Date,
   ) => {
     const sale = await SaleRepository.findById(saleId, tenantId);
+    console.log(sale);
     if (!sale) throw new AppError('Venda não encontrada', 404);
     if (sale.status !== SaleStatus.OPEN)
       throw new AppError(
         'Não é possível registrar pagamento em uma venda encerrada',
         400,
       );
-    const installment = sale.installments.find(
-      item => item.id === installmentId,
-    );
+    const installment = await Installment.findByPk(installmentId);
     if (!installment) throw new AppError('Parcela não encontrada', 404);
     if (installment.status !== InstallmentStatus.PENDING)
       throw new AppError('A parcela não está pendente', 400);

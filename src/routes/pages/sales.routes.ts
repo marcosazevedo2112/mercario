@@ -6,9 +6,20 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/sales', SalesController.pageList);
-router.get('/sales/new', (_req, res) => res.render('sales/new', {title: 'Nova venda'}));
-router.get('/sales/:id/cancel', (req, res) => res.render('sales/cancel', {title: 'Cancelar venda', saleId: req.params.id}));
-router.get('/sales/:id/settle', (req, res) => res.render('sales/settle', {title: 'Registrar pagamento', saleId: req.params.id}));
-router.get('/sales/:id', (req, res) => res.render('sales/show', {title: 'Venda', saleId: req.params.id}));
+router.get('/sales/new', (_req, res) =>
+  res.render('sales/new', {title: 'Nova venda'}),
+);
+router.get('/sales/:id/cancel', (req, res) =>
+  res.render('sales/cancel', {title: 'Cancelar venda', saleId: req.params.id}),
+);
+router.get('/sales/:id/settle', (req, res) =>
+  res.render('sales/settle', {
+    title: 'Registrar pagamento',
+    saleId: req.params.id,
+  }),
+);
+router.get('/sales/:id', (req, res) =>
+  res.render('sales/show', {title: 'Venda', saleId: req.params.id}),
+);
 
 export default router;

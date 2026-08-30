@@ -16,7 +16,7 @@
   <div id="error" class="alert alert-mercario" style="display:none"></div>
 </main><%- include('../partials/bottom-nav', {active: 'customers'}) %></div></div>
 <script>
-const id = <%= JSON.stringify(customerId) %>;
+const id = <%= customerId %>;
 const money = v => Number(v || 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 fetch('/api/customers/'+encodeURIComponent(id)).then(r=>r.ok?r.json():r.json().then(e=>Promise.reject(new Error(e.message||'Cliente não encontrado')))).then(c=>{
   const initials=c.name.split(' ').slice(0,2).map(x=>x[0]).join('').toUpperCase();
