@@ -17,6 +17,7 @@
     <ul class="nav flex-column gap-1">
       <li class="nav-item"><a class="nav-link <%= _p === '/' ? 'active fw-semibold' : '' %>" href="/"><i class="bi bi-grid me-2"></i>Visão geral</a></li>
       <li class="nav-item"><a class="nav-link <%= _p.startsWith('/sales') ? 'active fw-semibold' : '' %>" href="/sales"><i class="bi bi-receipt me-2"></i>Vendas</a></li>
+      <li class="nav-item"><a class="nav-link <%= _p.startsWith('/installments') ? 'active fw-semibold' : '' %>" href="/installments"><i class="bi bi-calendar-week me-2"></i>Parcelas</a></li>
       <li class="nav-item"><a class="nav-link <%= _p.startsWith('/customers') ? 'active fw-semibold' : '' %>" href="/customers"><i class="bi bi-people me-2"></i>Clientes</a></li>
       <li class="nav-item"><a class="nav-link <%= _p.startsWith('/products') ? 'active fw-semibold' : '' %>" href="/products"><i class="bi bi-box-seam me-2"></i>Produtos</a></li>
     </ul>

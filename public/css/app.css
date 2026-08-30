@@ -2,6 +2,11 @@
   --mercario-primary: #111827;
   --mercario-accent: #059669;
   --mercario-bg: #f9fafb;
+  --pm-pix: #0284c7;
+  --pm-boleto: #7c3aed;
+  --pm-credit: #dc2626;
+  --pm-debit: #ea580c;
+  --pm-cash: #059669;
 }
 body { background: var(--mercario-bg); font-family: 'Inter', system-ui, -apple-system, sans-serif; }
 .sidebar { width: 240px; min-height: 100vh; }
@@ -16,3 +21,49 @@ body { background: var(--mercario-bg); font-family: 'Inter', system-ui, -apple-s
 .empty-state { padding: 48px 24px; text-align: center; color: #6b7280; }
 .empty-state .icon { font-size: 48px; margin-bottom: 16px; }
 .badge-status { font-weight: 600; font-size: 0.75rem; letter-spacing: 0.02em; }
+
+/* Installments calendar */
+.legend-dot { width: 12px; height: 12px; border-radius: 999px; display: inline-block; border: 1px solid rgba(0,0,0,0.08); }
+.calendar-grid { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.cal-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+.cal-weekday { padding: 10px 8px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; color: #6b7280; text-align: center; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-cell { min-height: 132px; border-right: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 8px 6px; background: #fff; display: flex; flex-direction: column; gap: 6px; }
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell-other { background: #fcfcfc; opacity: 0.72; }
+.cal-cell-today { background: #f0fdf4; }
+.cal-cell-head { display: flex; align-items: center; }
+.cal-daynum { font-size: 0.8rem; font-weight: 600; color: #374151; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; border-radius: 999px; }
+.cal-daynum-today { background: #111827; color: #fff; }
+.cal-events { display: flex; flex-direction: column; gap: 5px; overflow-y: auto; max-height: 96px; scrollbar-width: thin; }
+.cal-events::-webkit-scrollbar { width: 4px; }
+.cal-event { display: flex; align-items: center; gap: 6px; border-radius: 8px; padding: 6px 7px; color: #fff; text-decoration: none; font-size: 0.72rem; line-height: 1.1; cursor: pointer; border-left: 3px solid rgba(255,255,255,0.85); transition: transform 0.08s, filter 0.12s, box-shadow 0.12s; }
+.cal-event:hover { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.12); color: #fff; }
+.cal-event:focus-visible { outline: 2px solid #111827; outline-offset: 1px; }
+.cal-event.pm-pix { background: var(--pm-pix); }
+.cal-event.pm-boleto { background: var(--pm-boleto); }
+.cal-event.pm-credit { background: var(--pm-credit); }
+.cal-event.pm-debit { background: var(--pm-debit); }
+.cal-event.pm-cash { background: var(--pm-cash); }
+.cal-event-paid { opacity: 0.72; }
+.cal-event-paid .cal-event-value { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.cal-event-overdue { box-shadow: inset 0 0 0 1.5px #fecaca, 0 0 0 1px rgba(220,38,38,0.15); }
+.cal-event-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.92); flex-shrink: 0; }
+.cal-event-main { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 1px; }
+.cal-event-customer { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-event-value { font-weight: 600; opacity: 0.96; }
+.cal-event-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; font-size: 0.62rem; opacity: 0.92; }
+.cal-event-method { white-space: nowrap; }
+.cal-event-num { font-weight: 700; }
+.cal-event-status { font-size: 0.7rem; }
+@media (max-width: 768px) {
+  .cal-cell { min-height: 98px; padding: 6px 4px; }
+  .cal-weekday { padding: 8px 4px; font-size: 0.65rem; }
+  .cal-event { padding: 5px 6px; font-size: 0.68rem; }
+  .cal-events { max-height: 72px; }
+}
+@media (max-width: 480px) {
+  .calendar-grid { border-radius: 10px; }
+  .cal-cell { min-height: 88px; }
+  .cal-daynum { width: 22px; height: 22px; font-size: 0.75rem; }
+}

@@ -7,6 +7,7 @@
   <ul class="nav flex-column gap-1">
     <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path === '/' || path.startsWith('/dashboard') ? 'active' : '' %>" href="/"><i class="bi bi-grid"></i> Visão geral</a></li>
     <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/sales') ? 'active' : '' %>" href="/sales"><i class="bi bi-receipt"></i> Vendas</a></li>
+    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/installments') ? 'active' : '' %>" href="/installments"><i class="bi bi-calendar-week"></i> Parcelas</a></li>
     <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/customers') ? 'active' : '' %>" href="/customers"><i class="bi bi-people"></i> Clientes</a></li>
     <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/products') ? 'active' : '' %>" href="/products"><i class="bi bi-box-seam"></i> Produtos</a></li>
   </ul>

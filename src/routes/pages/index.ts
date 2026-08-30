@@ -4,6 +4,7 @@ import dashboardRoutes from './dashboard.routes';
 import customerPages from './customers.routes';
 import productPages from './products.routes';
 import salesPages from './sales.routes';
+import installmentsPages from './installments.routes';
 
 const router = Router();
 
@@ -11,6 +12,7 @@ router.use('/auth', authRoutes);
 router.use('/customers', customerPages);
 router.use('/products', productPages);
 router.use('/sales', salesPages);
+router.use('/installments', installmentsPages);
 router.use('/', dashboardRoutes);
 
 export default router;
