@@ -1,4 +1,407 @@
 <%- include('../partials/head', {title: 'Mercario — Venda'}) %>
-<body><div class="page-shell"><div class="page-container"><main class="page-content"><%- include('../partials/detail-header', {title:'Venda', backHref:'/sales', menuHref:null}) %>
-<div id="loading" class="empty-state">Carregando venda...</div><div id="content" style="display:none"><div class="order-hero"><p id="order-id" class="order-id"></p><p id="total" class="order-total"></p><span id="status" class="order-status"></span></div><div class="card-mercario p-3 mb-3"><div class="section-label mt-0">Cliente</div><p id="customer" class="item-name"></p><p id="date" class="item-sub"></p></div><div class="section-label">Produtos</div><div id="items" class="card-mercario list-card mb-3"></div><div class="card-mercario p-3 mb-3"><div class="summary-row total"><span>Total</span><strong id="total-bottom"></strong></div></div><div class="action-row-mercario"><a id="settle" class="btn-outline-mercario"><i class="bi bi-check2-circle"></i> Quitar</a><a id="cancel" class="btn-danger-mercario"><i class="bi bi-x-circle"></i> Cancelar</a></div></div><div id="error" class="alert alert-mercario" style="display:none"></div></main><%- include('../partials/bottom-nav',{active:'sales'}) %></div></div>
-<script>const id = <%= saleId %>;const brl=v=>Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const val=(o,...keys)=>keys.reduce((a,k)=>a??o?.[k],null);fetch('/api/sales/'+id).then(r=>r.ok?r.json():Promise.reject(new Error('Venda não encontrada'))).then(s=>{const customerData=val(s,'customer','customerName');const items=val(s,'items','saleItems')||[];const total=val(s,'totalCents','total')??items.reduce((n,i)=>n+(Number(val(i,'unitPriceCents','priceCents')||0)*Number(i.quantity||0)),0);document.getElementById('order-id').textContent='Pedido #'+s.id;document.getElementById('total').textContent=brl(total);document.getElementById('total-bottom').textContent=brl(total);document.getElementById('status').textContent=s.status==='COMPLETED'?'Concluída':s.status==='CANCELED'?'Cancelada':'Aberta';document.getElementById('customer').textContent=(typeof customerData==='object'?customerData?.name:customerData)||('Cliente #'+s.customerId);document.getElementById('date').textContent=new Date(s.createdAt).toLocaleDateString('pt-BR');document.getElementById('items').innerHTML=items.map(i=>'<div class="line-item-mercario"><div class="line-item-top"><div><p class="line-item-name">'+(i.product?.name||'Produto #'+i.productId)+'</p><p class="line-item-meta">'+i.quantity+'x</p></div><span class="price-tag">'+brl((i.unitPriceCents||0)*(i.quantity||0))+'</span></div></div>').join('');document.getElementById('settle').href='/sales/'+id+'/settle';document.getElementById('cancel').href='/sales/'+id+'/cancel';document.getElementById('loading').style.display='none';document.getElementById('content').style.display='block'}).catch(e=>{loading.style.display='none';error.textContent=e.message;error.style.display='block'});</script></body></html>
+<body><div class="page-shell"><div class="page-container"><main class="page-content">
+<%- include('../partials/detail-header', {title: (typeof sale !== 'undefined' && sale ? 'Venda #' + sale.id : 'Venda'), backHref:'/sales', menuHref:null}) %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger py-2 small"><%= error %></div>
+<% } %>
+
+<% if (typeof sale === 'undefined' || !sale) { %>
+  <div class="empty-state p-3 text-center"><p class="confirm-text">Venda não encontrada.</p><a href="/sales" class="btn btn-sm btn-outline-secondary mt-2">Voltar para vendas</a></div>
+<% } else { %>
+<%
+  const fmtBRL = (cents) => Number((cents||0)/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+  const fmtDate = (iso) => {
+    if (!iso) return '';
+    // iso may be 'YYYY-MM-DD' or full ISO datetime string
+    const datePart = String(iso).slice(0,10);
+    const p = datePart.split('-');
+    if (p.length !== 3) return String(iso);
+    return p[2]+'/'+p[1]+'/'+p[0];
+  };
+  const fmtDateTime = (iso) => {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleDateString('pt-BR'); } catch(e){ return fmtDate(iso); }
+  };
+  const todayStr = new Date().toISOString().slice(0,10);
+  function dueStr(v){
+    if (!v) return '';
+    if (typeof v === 'string') return v.slice(0,10);
+    if (v instanceof Date) return v.toISOString().slice(0,10);
+    return String(v).slice(0,10);
+  }
+  // Resolve customer name
+  let customerName = 'Cliente #' + sale.customerId;
+  if (sale.customer && sale.customer.name) customerName = sale.customer.name;
+  else if (sale.customerName) customerName = typeof sale.customerName === 'object' ? (sale.customerName.name || customerName) : sale.customerName;
+  // Items: check multiple aliases
+  const items = sale.items || sale.saleItems || [];
+  const installments = sale.Saleinstallments || sale.installments || [];
+  const saleStatus = sale.status;
+  const statusLabel = saleStatus === 'COMPLETED' ? 'Concluída' : saleStatus === 'CANCELED' ? 'Cancelada' : 'Aberta';
+  const statusBg = saleStatus === 'COMPLETED' ? 'rgba(30,158,107,.18)' : saleStatus === 'CANCELED' ? 'rgba(226,75,74,.18)' : 'rgba(240,164,0,.18)';
+  const statusColor = saleStatus === 'COMPLETED' ? '#1E9E6B' : saleStatus === 'CANCELED' ? '#E24B4A' : '#8a6d00';
+  const totalCents = sale.totalCents ?? sale.total ?? 0;
+  const paymentMethodLabel = sale.paymentMethod || sale.payment_method || '-';
+  const installmentsCount = sale.installments ?? installments.length ?? 0;
+  // Per-installment amount display: use amountCents
+  const perInstallmentCents = installments.length ? installments[0].amountCents : 0;
+  const pendingInstallments = installments.filter(i => i.status === 'PENDING');
+  const pendingCount = pendingInstallments.length;
+%>
+
+<!-- Header -->
+<div class="order-hero" style="padding:18px 14px;background:var(--blue);border-radius:12px;color:#fff;text-align:center;margin-bottom:12px;">
+  <p class="order-id" style="margin:0 0 5px;font-size:11px;opacity:.9;">Venda #<%= sale.id %> — <%= customerName %></p>
+  <p class="order-total" style="margin:0 0 8px;font:700 22px 'Rubik',sans-serif;"><%= fmtBRL(totalCents) %></p>
+  <span class="order-status" style="display:inline-block;padding:4px 10px;border-radius:20px;background:<%= statusBg %>;color:<%= statusColor %>;font-size:10px;font-weight:700;"><%= statusLabel %></span>
+  <p style="margin:8px 0 0;font-size:10px;opacity:.85;"><%= fmtDateTime(sale.createdAt || sale.confirmedAt) %></p>
+</div>
+
+<!-- Customer -->
+<div class="card-mercario p-3 mb-3">
+  <div class="section-label mt-0" style="font-size:10px;font-weight:700;color:var(--text-secondary);letter-spacing:.04em;">CLIENTE</div>
+  <p class="item-name" style="margin:4px 0 2px;font-size:13px;font-weight:700;"><%= customerName %></p>
+  <p class="item-sub" style="margin:0;font-size:11px;color:var(--text-secondary);"><%= fmtDateTime(sale.createdAt || sale.confirmedAt) %></p>
+</div>
+
+<!-- Products -->
+<div class="section-label" style="font-size:10px;font-weight:700;color:var(--text-secondary);letter-spacing:.04em;margin-bottom:6px;">PRODUTOS</div>
+<div class="card-mercario list-card mb-3" style="overflow:hidden;">
+  <% if (!items.length) { %>
+    <div class="p-3 text-center"><p class="confirm-text" style="margin:0;font-size:11px;color:var(--text-secondary);">Nenhum produto</p></div>
+  <% } else { %>
+    <div style="display:flex;justify-content:space-between;padding:8px 14px;background:#f9f9f8;border-bottom:1px solid #eee;font-size:10px;font-weight:700;color:var(--text-secondary);">
+      <span style="flex:1;">Produto</span><span style="width:40px;text-align:right;">Qtd.</span><span style="width:80px;text-align:right;">Unit.</span><span style="width:80px;text-align:right;">Subtotal</span>
+    </div>
+    <% items.forEach(it => {
+         const prodName = it.productName || (it.product && it.product.name) || ('Produto #' + it.productId);
+         const qty = it.quantity || 0;
+         const unit = it.unitPriceCents ?? it.priceCents ?? 0;
+         const sub = it.subtotalCents ?? (qty * unit) ?? 0;
+    %>
+      <div class="line-item-mercario" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid #eee;">
+        <span style="flex:1;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><%= prodName %></span>
+        <span style="width:40px;text-align:right;font-size:11px;"><%= qty %></span>
+        <span style="width:80px;text-align:right;font-size:11px;"><%= fmtBRL(unit) %></span>
+        <span style="width:80px;text-align:right;font:600 11px 'Rubik',sans-serif;color:var(--blue);"><%= fmtBRL(sub) %></span>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<!-- Financial summary -->
+<div class="card-mercario p-3 mb-3">
+  <div class="summary-row" style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--text-secondary);"><span>Subtotal</span><strong><%= fmtBRL(sale.subtotalCents ?? totalCents) %></strong></div>
+  <% if (sale.discountCents) { %><div class="summary-row" style="display:flex;justify-content:space-between;padding:5px 0;font-size:11px;color:var(--text-secondary);"><span>Desconto</span><strong>- <%= fmtBRL(sale.discountCents) %></strong></div><% } %>
+  <div class="summary-row total" style="display:flex;justify-content:space-between;padding:8px 0 6px;margin-top:4px;border-top:1px solid #eee;font:600 13px 'Rubik',sans-serif;"><span>Total</span><strong><%= fmtBRL(totalCents) %></strong></div>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px dashed #eee;font-size:11px;">
+    <p class="mb-1"><strong>Forma de pagamento:</strong> <%= paymentMethodLabel %></p>
+    <p class="mb-0"><strong>Parcelas:</strong> <%= installmentsCount %>x de <%= fmtBRL(perInstallmentCents) %></p>
+  </div>
+</div>
+
+<!-- Installments -->
+<div class="section-label" style="font-size:10px;font-weight:700;color:var(--text-secondary);letter-spacing:.04em;margin-bottom:6px;">PARCELAS</div>
+<div class="card-mercario list-card mb-3" id="installments-list">
+  <% if (!installments.length) { %>
+    <div class="p-3 text-center"><p class="confirm-text" style="margin:0;font-size:11px;color:var(--text-secondary);">Nenhuma parcela</p></div>
+  <% } else { %>
+    <% installments.forEach(inst => {
+         const s = inst.status;
+         const dStr = dueStr(inst.dueDate);
+         const amount = fmtBRL(inst.amountCents);
+         let badgeHtml = '';
+         let showActions = false;
+         let badgeClass = '';
+         let dotColor = 'var(--blue)';
+         if (s === 'PAID') {
+           const paidAtFmt = inst.paidAt ? fmtDateTime(inst.paidAt) : '';
+           badgeHtml = '<span class="badge bg-success" style="font-size:10px;">✓ Pago em ' + paidAtFmt + '</span>';
+           dotColor = 'var(--green)';
+         } else if (s === 'SETTLED') {
+           badgeHtml = '<span class="badge" style="font-size:10px;background:#0d6efd;color:#fff;">✓ Quitado</span>';
+           dotColor = '#0d6efd';
+         } else if (s === 'CANCELED') {
+           badgeHtml = '<span class="badge bg-secondary" style="font-size:10px;">✗ Cancelada</span>';
+           dotColor = '#999';
+         } else if (s === 'PENDING') {
+           showActions = true;
+           if (dStr < todayStr) {
+             badgeHtml = '<span class="badge bg-danger" style="font-size:10px;">🔴 Vencida</span>';
+             dotColor = 'var(--red)';
+           } else if (dStr === todayStr) {
+             badgeHtml = '<span class="badge bg-warning text-dark" style="font-size:10px;">🟠 Vence hoje</span>';
+             dotColor = 'var(--amber)';
+           } else {
+             badgeHtml = '<span class="badge bg-primary" style="font-size:10px;">🔵 ' + fmtDate(dStr) + '</span>';
+             dotColor = 'var(--blue)';
+           }
+         }
+    %>
+      <div class="installment-row" data-sale-id="<%= sale.id %>" data-installment-id="<%= inst.id %>" data-status="<%= s %>" style="padding:12px 14px;border-bottom:1px solid #eee;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:10px;height:10px;border-radius:50%;flex:0 0 10px;background:<%= dotColor %>;display:inline-block;"></span>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:12px;font-weight:700;">Parcela <%= inst.number %>/<%= installmentsCount %> — <%= amount %></p>
+            <p style="margin:2px 0 0;font-size:10px;color:var(--text-secondary);">Vencimento: <%= fmtDate(dStr) %> <%- badgeHtml %></p>
+          </div>
+          <div style="flex:0 0 auto;"><%- badgeHtml %></div>
+        </div>
+        <% if (showActions) { %>
+          <div class="d-flex gap-2 mt-2 installment-actions">
+            <button type="button" class="btn btn-sm btn-outline-primary pay-btn flex-fill" style="font-size:11px;font-weight:600;"
+              data-sale-id="<%= sale.id %>"
+              data-installment-id="<%= inst.id %>"
+              data-customer="<%= customerName.replace(/"/g,'&quot;') %>"
+              data-number="<%= inst.number %>"
+              data-total="<%= installmentsCount %>"
+              data-amount="<%= amount %>"
+              data-due="<%= fmtDate(dStr) %>"
+              data-iso="<%= dStr %>"
+              data-pending="<%= pendingCount %>">Marcar como paga</button>
+            <button type="button" class="btn btn-sm btn-outline-secondary charge-btn flex-fill" style="font-size:11px;font-weight:600;"
+              data-sale-id="<%= sale.id %>"
+              data-installment-id="<%= inst.id %>"
+              data-customer="<%= customerName.replace(/"/g,'&quot;') %>"
+              data-amount="<%= amount %>"
+              data-due="<%= fmtDate(dStr) %>">Enviar cobrança</button>
+          </div>
+        <% } %>
+        <!-- Charge history container -->
+        <div class="charge-history mt-2" data-installment-id="<%= inst.id %>" style="display:none;">
+          <p style="font-size:10px;font-weight:700;color:var(--text-secondary);margin:6px 0 4px;">Cobranças enviadas:</p>
+          <div class="charge-timeline" style="font-size:11px;"></div>
+        </div>
+      </div>
+    <% }) %>
+  <% } %>
+</div>
+
+<% if (saleStatus === 'OPEN') { %>
+<div class="action-row-mercario" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;">
+  <a href="/sales/<%= sale.id %>/settle" class="btn-outline-mercario" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1px solid var(--blue);border-radius:10px;background:#fff;color:var(--blue);font:600 12px 'Rubik',sans-serif;text-decoration:none;"><i class="bi bi-check2-circle"></i> Quitar</a>
+  <a href="/sales/<%= sale.id %>/cancel" class="btn-danger-mercario" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border:1px solid #f3c4c4;border-radius:10px;background:#fff;color:var(--red);font:600 12px 'Rubik',sans-serif;text-decoration:none;"><i class="bi bi-x-circle"></i> Cancelar</a>
+</div>
+<% } %>
+
+<% } %>
+
+</main><%- include('../partials/bottom-nav',{active:'sales'}) %></div></div>
+
+<!-- Payment confirmation modal -->
+<div id="payment-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;align-items:center;justify-content:center;padding:16px;">
+  <div class="card-mercario" style="width:100%;max-width:400px;padding:20px;">
+    <h5 style="font:600 15px 'Rubik',sans-serif;margin:0 0 12px;">Confirmar pagamento</h5>
+    <div style="font-size:12px;line-height:1.6;">
+      <p class="mb-1"><strong>Cliente:</strong> <span id="pm-customer"></span></p>
+      <p class="mb-1"><strong>Parcela:</strong> <span id="pm-installment"></span></p>
+      <p class="mb-1"><strong>Valor:</strong> <span id="pm-amount"></span></p>
+      <p class="mb-1"><strong>Vencimento:</strong> <span id="pm-due"></span></p>
+    </div>
+    <div id="pm-warning" style="display:none;margin-top:10px;padding:8px 10px;border-radius:8px;background:#fff8e1;border:1px solid #ffe082;font-size:11px;color:#8d6e00;">⚠️ Esta é a última parcela pendente. A venda será concluída automaticamente.</div>
+    <div id="pm-error" style="display:none;margin-top:10px;color:var(--red);font-size:11px;"></div>
+    <div class="d-flex gap-2 mt-3">
+      <button type="button" id="pm-cancel" class="btn btn-outline-secondary flex-fill" style="font-size:12px;font-weight:600;">Cancelar</button>
+      <button type="button" id="pm-confirm" class="btn flex-fill" style="background:var(--blue);color:#fff;font-size:12px;font-weight:600;">Confirmar pagamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- Charge modal -->
+<div id="charge-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1050;align-items:center;justify-content:center;padding:16px;">
+  <div class="card-mercario" style="width:100%;max-width:400px;padding:20px;">
+    <h5 style="font:600 15px 'Rubik',sans-serif;margin:0 0 12px;">Enviar cobrança</h5>
+    <div style="font-size:12px;">
+      <p class="mb-2" style="font-weight:600;">Canal:</p>
+      <div class="d-flex gap-3 mb-3" id="charge-channels">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;"><input type="radio" name="channel" value="WHATSAPP" checked> WhatsApp</label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;"><input type="radio" name="channel" value="EMAIL"> E-mail</label>
+      </div>
+      <label class="form-label" style="font-size:11px;font-weight:600;">Mensagem:</label>
+      <textarea id="charge-message" class="form-control" rows="4" style="font-size:12px;"></textarea>
+    </div>
+    <div id="charge-error" style="display:none;margin-top:10px;color:var(--red);font-size:11px;"></div>
+    <div class="d-flex gap-2 mt-3">
+      <button type="button" id="charge-cancel" class="btn btn-outline-secondary flex-fill" style="font-size:12px;font-weight:600;">Cancelar</button>
+      <button type="button" id="charge-confirm" class="btn flex-fill" style="background:var(--blue);color:#fff;font-size:12px;font-weight:600;">Enviar cobrança</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast-container" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1060;display:none;">
+  <div class="card-mercario" style="padding:10px 18px;background:var(--green);color:#fff;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);">Venda concluída ✓</div>
+</div>
+<div id="toast-paid" style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:1060;display:none;">
+  <div class="card-mercario" style="padding:10px 18px;background:var(--blue);color:#fff;font-size:12px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);">Pagamento registrado ✓</div>
+</div>
+
+<script>
+(function(){
+  const saleIdGlobal = <%= (typeof sale !== 'undefined' && sale) ? sale.id : 'null' %>;
+  // Payment modal
+  const modal = document.getElementById('payment-modal');
+  const pmCustomer = document.getElementById('pm-customer');
+  const pmInstallment = document.getElementById('pm-installment');
+  const pmAmount = document.getElementById('pm-amount');
+  const pmDue = document.getElementById('pm-due');
+  const pmWarning = document.getElementById('pm-warning');
+  const pmError = document.getElementById('pm-error');
+  const pmCancel = document.getElementById('pm-cancel');
+  const pmConfirm = document.getElementById('pm-confirm');
+  let pendingPayBtn = null, pendingSaleId = null, pendingInstId = null;
+
+  function openPayModal(btn){
+    pendingPayBtn = btn;
+    pendingSaleId = btn.dataset.saleId;
+    pendingInstId = btn.dataset.installmentId;
+    pmCustomer.textContent = btn.dataset.customer || '';
+    pmInstallment.textContent = (btn.dataset.number || '?') + '/' + (btn.dataset.total || '?');
+    pmAmount.textContent = btn.dataset.amount || '';
+    pmDue.textContent = btn.dataset.due || '';
+    const isLast = Number(btn.dataset.pending) === 1;
+    pmWarning.style.display = isLast ? 'block' : 'none';
+    pmError.style.display = 'none'; pmError.textContent='';
+    pmConfirm.disabled = false; pmConfirm.textContent='Confirmar pagamento';
+    modal.style.display='flex';
+  }
+  function closePayModal(){ modal.style.display='none'; pendingPayBtn=null; }
+  document.querySelectorAll('.pay-btn').forEach(btn=> btn.addEventListener('click', ()=> openPayModal(btn)));
+  if (pmCancel) pmCancel.addEventListener('click', closePayModal);
+  if (modal) modal.addEventListener('click', (e)=>{ if(e.target===modal) closePayModal(); });
+
+  if (pmConfirm) pmConfirm.addEventListener('click', async ()=>{
+    if(!pendingSaleId||!pendingInstId) return;
+    pmConfirm.disabled=true; pmConfirm.textContent='Processando...'; pmError.style.display='none';
+    try{
+      const res = await fetch('/api/sales/'+pendingSaleId+'/installments/'+pendingInstId+'/payment',{method:'POST',headers:{'Content-Type':'application/json'}});
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.message||'Não foi possível registrar o pagamento.');
+      // Update row in-place
+      if(pendingPayBtn){
+        const row = pendingPayBtn.closest('.installment-row');
+        if(row){
+          const actions = row.querySelector('.installment-actions');
+          if(actions) actions.remove();
+          // replace badge: remove existing badge near due line and add new badge
+          const paidAt = data.installment && data.installment.paidAt ? new Date(data.installment.paidAt).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+          // Add success badge at bottom of row
+          const success = document.createElement('div');
+          success.style.marginTop='6px';
+          success.innerHTML = '<span class="badge bg-success" style="font-size:10px;">✓ Pago em '+paidAt+'</span>';
+          row.appendChild(success);
+          row.style.opacity='.9';
+          row.dataset.status='PAID';
+        }
+        // Decrement pending count for remaining buttons
+        document.querySelectorAll('.pay-btn').forEach(b=>{
+          const c = Number(b.dataset.pending);
+          if(!isNaN(c) && c>1) b.dataset.pending = String(c-1);
+        });
+      }
+      closePayModal();
+      if(data.saleCompleted){
+        const toast=document.getElementById('toast-container');
+        toast.style.display='block'; setTimeout(()=>toast.style.display='none',3000);
+      } else {
+        const t2=document.getElementById('toast-paid');
+        t2.style.display='block'; setTimeout(()=>t2.style.display='none',2000);
+      }
+    }catch(err){
+      pmError.textContent=err.message||'Erro ao registrar pagamento.'; pmError.style.display='block';
+      pmConfirm.disabled=false; pmConfirm.textContent='Confirmar pagamento';
+    }
+  });
+
+  // Charge modal
+  const chargeModal = document.getElementById('charge-modal');
+  const chargeMessage = document.getElementById('charge-message');
+  const chargeCancel = document.getElementById('charge-cancel');
+  const chargeConfirm = document.getElementById('charge-confirm');
+  const chargeError = document.getElementById('charge-error');
+  let chargeSaleId=null, chargeInstId=null;
+
+  function openChargeModal(btn){
+    chargeSaleId = btn.dataset.saleId;
+    chargeInstId = btn.dataset.installmentId;
+    const customer = btn.dataset.customer||'';
+    const amount = btn.dataset.amount||'';
+    const due = btn.dataset.due||'';
+    chargeMessage.value = 'Olá ' + customer + ', sua parcela de ' + amount + ' vence em ' + due + '. Por favor, efetue o pagamento até a data de vencimento.';
+    chargeError.style.display='none'; chargeError.textContent='';
+    chargeConfirm.disabled=false; chargeConfirm.textContent='Enviar cobrança';
+    chargeModal.style.display='flex';
+    // Load history
+    loadCharges(chargeSaleId, chargeInstId);
+  }
+  function closeChargeModal(){ chargeModal.style.display='none'; }
+  document.querySelectorAll('.charge-btn').forEach(btn=> btn.addEventListener('click', ()=> openChargeModal(btn)));
+  if(chargeCancel) chargeCancel.addEventListener('click', closeChargeModal);
+  if(chargeModal) chargeModal.addEventListener('click', (e)=>{ if(e.target===chargeModal) closeChargeModal(); });
+
+  async function loadCharges(saleId, instId){
+    const container = document.querySelector('.charge-history[data-installment-id="'+instId+'"]');
+    if(!container) return;
+    const timeline = container.querySelector('.charge-timeline');
+    try{
+      const res = await fetch('/api/sales/'+saleId+'/installments/'+instId+'/charges');
+      if(!res.ok) return;
+      const charges = await res.json();
+      const arr = Array.isArray(charges) ? charges : (charges.data||[]);
+      if(!arr.length){ container.style.display='none'; return; }
+      container.style.display='block';
+      timeline.innerHTML = arr.map(c=>{
+        const d = new Date(c.createdAt||c.created_at);
+        const day = String(d.getDate()).padStart(2,'0');
+        const mon = String(d.getMonth()+1).padStart(2,'0');
+        const hh = String(d.getHours()).padStart(2,'0');
+        const mm = String(d.getMinutes()).padStart(2,'0');
+        const ch = c.channel||'';
+        return '<div style="padding:3px 0;border-bottom:1px solid #f0f0f0;">• '+day+'/'+mon+' '+hh+':'+mm+' — '+ch+'</div>';
+      }).join('');
+    }catch(e){}
+  }
+  // Load histories for all pending installments on page load
+  document.querySelectorAll('.charge-history').forEach(el=>{
+    const instId = el.dataset.installmentId;
+    if(saleIdGlobal) loadCharges(saleIdGlobal, instId);
+  });
+
+  if(chargeConfirm) chargeConfirm.addEventListener('click', async ()=>{
+    if(!chargeSaleId||!chargeInstId) return;
+    const channel = (document.querySelector('input[name="channel"]:checked')||{}).value || 'WHATSAPP';
+    const message = (chargeMessage.value||'').trim();
+    if(!message){ chargeError.textContent='A mensagem é obrigatória.'; chargeError.style.display='block'; return; }
+    chargeConfirm.disabled=true; chargeConfirm.textContent='Enviando...'; chargeError.style.display='none';
+    try{
+      const res = await fetch('/api/sales/'+chargeSaleId+'/installments/'+chargeInstId+'/charges',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({channel, triggeredBy:'MANUAL', message})
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok) throw new Error(data.message||'Não foi possível enviar a cobrança.');
+      closeChargeModal();
+      // Append to timeline
+      const container = document.querySelector('.charge-history[data-installment-id="'+chargeInstId+'"]');
+      if(container){
+        container.style.display='block';
+        const timeline = container.querySelector('.charge-timeline');
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2,'0');
+        const mon = String(now.getMonth()+1).padStart(2,'0');
+        const hh = String(now.getHours()).padStart(2,'0');
+        const mm = String(now.getMinutes()).padStart(2,'0');
+        const div = document.createElement('div');
+        div.style.padding='3px 0'; div.style.borderBottom='1px solid #f0f0f0';
+        div.textContent='• '+day+'/'+mon+' '+hh+':'+mm+' — '+channel;
+        timeline.prepend(div);
+      }
+    }catch(err){
+      chargeError.textContent=err.message||'Erro ao enviar cobrança.'; chargeError.style.display='block';
+      chargeConfirm.disabled=false; chargeConfirm.textContent='Enviar cobrança';
+    }
+  });
+})();
+</script>
+</body></html>

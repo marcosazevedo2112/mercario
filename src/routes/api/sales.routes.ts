@@ -7,6 +7,7 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get('/', SalesController.findMany);
+router.get('/receivables', SalesController.getReceivables);
 router.post('/', SalesController.create);
 router.get('/:id', SalesController.findById);
 router.post('/:id/cancel', SalesController.cancel);

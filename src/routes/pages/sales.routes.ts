@@ -18,8 +18,6 @@ router.get('/sales/:id/settle', (req, res) =>
     saleId: req.params.id,
   }),
 );
-router.get('/sales/:id', (req, res) =>
-  res.render('sales/show', {title: 'Venda', saleId: req.params.id}),
-);
+router.get('/sales/:id', SalesController.findById);
 
 export default router;

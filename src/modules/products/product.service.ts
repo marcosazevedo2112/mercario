@@ -1,3 +1,4 @@
+import {Op} from 'sequelize';
 import Product from './product.model';
 import {CreateProductDTO} from './schemas/product.create.schema';
 import {UpdateProductDTO} from './schemas/product.update.schema';
@@ -13,13 +14,22 @@ const ProductService = {
     return product;
   },
 
-  findAll: async (tenantId: number) => {
+  findAll: async (tenantId: number, opts?: {search?: string}) => {
+    const search = opts?.search?.trim();
+    const where: Record<string, unknown> = {tenantId, active: true};
+    if (search) {
+      const like = `%${search.replace(/[%_\\]/g, '\\$&')}%`;
+      Object.assign(where, {
+        [Op.or]: [
+          {name: {[Op.iLike]: like}},
+          {description: {[Op.iLike]: like}},
+        ],
+      });
+    }
     const products = await Product.findAll({
-      where: {
-        tenantId,
-        active: true,
-      },
+      where,
       order: [['createdAt', 'DESC']],
+      limit: search ? 10 : undefined,
     });
 
     return products;

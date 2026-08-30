@@ -1,5 +1,74 @@
 <%- include('../partials/head', {title: 'Mercario — Cancelar venda'}) %>
 <body><div class="page-shell"><div class="page-container"><main class="page-content"><%- include('../partials/detail-header', {title:'Cancelar venda', backHref:'/sales/'+saleId, menuHref:null}) %>
-<div class="card-mercario confirm-card mb-3"><div class="confirm-icon"><i class="bi bi-exclamation-triangle"></i></div><p class="confirm-title">Cancelar esta venda?</p><p class="confirm-text">A ação não pode ser desfeita. O estoque será tratado pelo domínio de vendas.</p></div>
-<div id="summary" class="card-mercario p-3 mb-3">Carregando venda...</div><div class="card-mercario form-card"><label class="form-label">Motivo do cancelamento</label><textarea id="reason" class="form-control form-control-mercario" rows="3" maxlength="500" required placeholder="Ex: cliente desistiu da compra"></textarea><div id="error" class="error-message"></div><button id="submit" class="btn-danger-mercario mt-3">Confirmar cancelamento</button></div>
-</main></div></div><script>const id = <%= saleId %>;const brl=v=>Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});fetch('/api/sales/'+id).then(r=>r.json()).then(s=>{summary.innerHTML='<p class="item-name mb-1">Pedido #'+s.id+'</p><p class="item-sub">'+brl(s.totalCents||s.total||0)+'</p>'});submit.onclick=async()=>{if(!reason.value.trim()){error.textContent='Informe o motivo.';error.style.display='block';return}const r=await fetch('/api/sales/'+id+'/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:reason.value.trim()})});if(r.ok)location.href='/sales/'+id;else{const b=await r.json().catch(()=>({}));error.textContent=b.message||'Não foi possível cancelar a venda.';error.style.display='block'}};</script></body></html>
+
+<div class="card-mercario confirm-card mb-3" style="text-align:center;padding:24px 16px;">
+  <div class="confirm-icon" style="width:56px;height:56px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fbe5e5;color:var(--red);font-size:25px;"><i class="bi bi-exclamation-triangle"></i></div>
+  <p class="confirm-title" style="margin:0 0 5px;font:600 17px 'Rubik',sans-serif;">Cancelar esta venda?</p>
+  <p class="confirm-text" style="margin:0;color:var(--text-secondary);font-size:11px;line-height:1.5;">A ação não pode ser desfeita. O estoque será tratado pelo domínio de vendas.</p>
+</div>
+
+<div id="summary" class="card-mercario p-3 mb-3" style="font-size:12px;">Carregando venda...</div>
+
+<div id="pending-warning" class="alert d-flex align-items-start gap-2 mb-3" style="display:none !important;background:#fff8e1;border:1px solid #ffe082;color:#6d4c00;font-size:11px;border-radius:10px;padding:10px 12px;">
+  <i class="bi bi-exclamation-circle" style="font-size:14px;flex:0 0 auto;margin-top:1px;"></i>
+  <span id="pending-warning-text"></span>
+</div>
+
+<div class="card-mercario form-card" style="padding:16px;">
+  <label for="reason" class="form-label" style="font-size:11px;font-weight:700;letter-spacing:.02em;">Motivo do cancelamento <span class="text-danger">*</span></label>
+  <textarea id="reason" class="form-control form-control-mercario" rows="3" maxlength="500" required placeholder="Ex: cliente desistiu da compra" style="font-size:12px;border-radius:10px;"></textarea>
+  <p class="form-hint" style="margin:6px 0 0;color:var(--text-secondary);font-size:10px;">Máximo 500 caracteres. Seja claro para o histórico.</p>
+  <div id="error" class="error-message" style="display:none;margin-top:8px;color:var(--red);font-size:11px;"></div>
+  <button id="submit" class="btn-danger-mercario mt-3" style="width:100%;border:1px solid #f3c4c4;border-radius:10px;padding:11px 14px;background:#fff;color:var(--red);font:700 12px 'Rubik',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+    <i class="bi bi-x-circle"></i> Confirmar cancelamento
+  </button>
+  <a href="/sales/<%= saleId %>" class="btn btn-outline-secondary mt-2" style="width:100%;border-radius:10px;padding:10px 14px;font:600 12px 'Rubik',sans-serif;text-align:center;display:block;text-decoration:none;">Voltar</a>
+</div>
+
+</main></div></div>
+<script>
+const id = <%= saleId %>;
+const brl=v=>Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const summaryEl = document.getElementById('summary');
+const warningEl = document.getElementById('pending-warning');
+const warningText = document.getElementById('pending-warning-text');
+const errorEl = document.getElementById('error');
+const reasonEl = document.getElementById('reason');
+const submitBtn = document.getElementById('submit');
+
+fetch('/api/sales/'+id).then(r=>{ if(!r.ok) throw new Error('Venda não encontrada'); return r.json(); }).then(s=>{
+  const total = s.totalCents ?? s.total ?? 0;
+  const installments = s.Saleinstallments || s.installments || [];
+  const pending = installments.filter(function(i){ return i.status === 'PENDING'; }).length;
+  const customerName = (s.customer && s.customer.name) ? s.customer.name : ('Cliente #' + s.customerId);
+  summaryEl.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;"><div><p class="item-name mb-1" style="margin:0;font-size:13px;font-weight:700;">Pedido #' + s.id + ' — ' + customerName + '</p><p class="item-sub" style="margin:0;font-size:11px;color:var(--text-secondary);">' + brl(total) + ' · ' + installments.length + ' parcela(s) · ' + pending + ' pendente(s)</p></div><span style="font-size:10px;font-weight:700;padding:4px 8px;border-radius:20px;background:' + (s.status==='OPEN'?'#fff0d6':s.status==='COMPLETED'?'#e3f5ee':'#fbe5e5') + ';color:' + (s.status==='OPEN'?'#8a6d00':s.status==='COMPLETED'?'var(--green)':'var(--red)') + ';">' + (s.status==='OPEN'?'Aberta':s.status==='COMPLETED'?'Concluída':'Cancelada') + '</span></div>';
+  if (pending > 0) {
+    warningText.textContent = 'Esta ação cancelará também todas as parcelas pendentes (' + pending + ' parcela' + (pending!==1?'s':'') + ').';
+    warningEl.style.display = 'flex';
+    warningEl.style.setProperty('display','flex','important');
+  }
+}).catch(function(e){
+  summaryEl.innerHTML = '<p style="margin:0;color:var(--red);font-size:11px;">' + e.message + '</p>';
+});
+
+submitBtn.onclick=async()=>{
+  const val = reasonEl.value.trim();
+  if(!val){ errorEl.textContent='Informe o motivo.'; errorEl.style.display='block'; reasonEl.focus(); return; }
+  errorEl.style.display='none';
+  submitBtn.disabled=true; submitBtn.innerHTML='<span class="spinner-border spinner-border-sm" style="width:14px;height:14px;"></span> Cancelando...';
+  try{
+    const r=await fetch('/api/sales/'+id+'/cancel',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reason:val})});
+    if(r.ok) location.href='/sales/'+id;
+    else{
+      const b=await r.json().catch(()=>({}));
+      errorEl.textContent=b.message||'Não foi possível cancelar a venda.';
+      errorEl.style.display='block';
+      submitBtn.disabled=false; submitBtn.innerHTML='<i class="bi bi-x-circle"></i> Confirmar cancelamento';
+    }
+  }catch(err){
+    errorEl.textContent='Erro de conexão. Tente novamente.';
+    errorEl.style.display='block';
+    submitBtn.disabled=false; submitBtn.innerHTML='<i class="bi bi-x-circle"></i> Confirmar cancelamento';
+  }
+};
+</script></body></html>

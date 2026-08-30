@@ -17,7 +17,9 @@ const CustomerController = {
   },
   findAll: async (req: Request, res: Response) => {
     try {
-      const customers = await CustomerService.findAll(getTenantId(req));
+      const search =
+        typeof req.query.search === 'string' ? req.query.search.trim() : undefined;
+      const customers = await CustomerService.findAll(getTenantId(req), {search});
       return res.status(200).json(customers);
     } catch (error: unknown) {
       console.error(error);

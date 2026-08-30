@@ -17,7 +17,9 @@ const ProductController = {
   },
   findAll: async (req: Request, res: Response) => {
     try {
-      const products = await ProductService.findAll(getTenantId(req));
+      const search =
+        typeof req.query.search === 'string' ? req.query.search.trim() : undefined;
+      const products = await ProductService.findAll(getTenantId(req), {search});
       return res.status(200).json(products);
     } catch (error: unknown) {
       console.error(error);

@@ -1,18 +1,341 @@
 <%- include('../partials/head', {title: 'Mercario — Nova venda'}) %>
 <body><div class="page-shell"><div class="page-container"><main class="page-content"><%- include('../partials/detail-header', {title:'Nova venda', backHref:'/sales', menuHref:null}) %>
-<form id="form"><div class="section-label mt-0">Cliente</div><div class="search-box"><i class="bi bi-search"></i><input id="customer-search" type="search" placeholder="Buscar cliente"></div><div id="customers" class="search-results"></div><div id="selected-customer"></div>
-<div class="section-label">Produtos</div><div class="search-box"><i class="bi bi-search"></i><input id="product-search" type="search" placeholder="Buscar produto"></div><div id="products" class="search-results"></div><div id="items" class="card-mercario list-card mb-2"></div>
-<div class="section-label">Pagamento</div><div class="payment-grid mb-2"><button type="button" class="payment-option selected" data-method="PIX">PIX</button><button type="button" class="payment-option" data-method="BOLETO">Boleto</button><button type="button" class="payment-option" data-method="CREDIT_CARD">Cartão de crédito</button><button type="button" class="payment-option" data-method="DEBIT_CARD">Cartão de débito</button><button type="button" class="payment-option" data-method="CASH">Dinheiro</button></div><div class="row g-2"><div class="col-6"><label class="form-label">Parcelas</label><input id="installments" type="number" min="1" value="1" class="form-control form-control-mercario"></div><div class="col-6"><label class="form-label">Primeiro vencimento</label><input id="due" type="date" class="form-control form-control-mercario"></div></div>
-<div class="section-label">Desconto</div><input id="discount" class="form-control form-control-mercario" inputmode="decimal" value="0,00"><div class="section-label">Observações</div><textarea id="notes" class="form-control form-control-mercario" rows="2" maxlength="500"></textarea>
-<div class="card-mercario p-3 mt-3"><div class="summary-row"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div><div class="summary-row"><span>Desconto</span><strong id="discount-view">R$ 0,00</strong></div><div class="summary-row total"><span>Total</span><strong id="total">R$ 0,00</strong></div></div><div id="error" class="error-message"></div><button class="btn-mercario mt-3" type="submit">Finalizar venda</button></form>
+<form id="form" novalidate>
+
+  <!-- Cliente -->
+  <div class="section-label mt-0">Cliente</div>
+  <div style="position:relative;">
+    <div class="search-box">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input id="customer-search" type="search" placeholder="Buscar cliente por nome, telefone ou e-mail" autocomplete="off" aria-label="Buscar cliente" aria-autocomplete="list" aria-controls="customer-results">
+      <span id="customer-spinner" style="display:none;color:var(--text-secondary);"><i class="bi bi-arrow-clockwise" style="display:inline-block;animation:spin .6s linear infinite;"></i></span>
+    </div>
+    <div id="customer-results" class="card-mercario" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;max-height:260px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12);"></div>
+  </div>
+  <div id="selected-customer" class="mt-2"></div>
+  <p id="customer-hint" class="form-hint">Digite ao menos 2 caracteres para buscar no servidor.</p>
+
+  <!-- Produtos -->
+  <div class="section-label">Produtos</div>
+  <div style="position:relative;">
+    <div class="search-box">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input id="product-search" type="search" placeholder="Buscar produto por nome" autocomplete="off" aria-label="Buscar produto" aria-autocomplete="list" aria-controls="product-results">
+      <span id="product-spinner" style="display:none;color:var(--text-secondary);"><i class="bi bi-arrow-clockwise" style="display:inline-block;animation:spin .6s linear infinite;"></i></span>
+    </div>
+    <div id="product-results" class="card-mercario" style="display:none;position:absolute;top:calc(100% + 6px);left:0;right:0;z-index:20;max-height:260px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12);"></div>
+  </div>
+  <p class="form-hint">A busca é feita no servidor — apenas resultados filtrados são carregados.</p>
+  <div id="items" class="card-mercario list-card mb-2" style="min-height:44px;"></div>
+
+  <!-- Pagamento -->
+  <div class="section-label">Pagamento</div>
+  <div class="payment-grid mb-2">
+    <button type="button" class="payment-option selected" data-method="PIX">PIX</button>
+    <button type="button" class="payment-option" data-method="BOLETO">Boleto</button>
+    <button type="button" class="payment-option" data-method="CREDIT_CARD">Cartão de crédito</button>
+    <button type="button" class="payment-option" data-method="DEBIT_CARD">Cartão de débito</button>
+    <button type="button" class="payment-option" data-method="CASH">Dinheiro</button>
+  </div>
+  <div class="row g-2">
+    <div class="col-6"><label class="form-label">Parcelas</label><input id="installments" type="number" min="1" value="1" class="form-control form-control-mercario"></div>
+    <div class="col-6"><label class="form-label">Primeiro vencimento</label><input id="due" type="date" class="form-control form-control-mercario"></div>
+  </div>
+
+  <div class="section-label">Desconto</div>
+  <input id="discount" class="form-control form-control-mercario" inputmode="decimal" value="0,00">
+  <div class="section-label">Observações</div>
+  <textarea id="notes" class="form-control form-control-mercario" rows="2" maxlength="500"></textarea>
+
+  <div class="card-mercario p-3 mt-3">
+    <div class="summary-row"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
+    <div class="summary-row"><span>Desconto</span><strong id="discount-view">R$ 0,00</strong></div>
+    <div class="summary-row total"><span>Total</span><strong id="total">R$ 0,00</strong></div>
+  </div>
+  <div id="error" class="error-message" role="alert"></div>
+  <button class="btn-mercario mt-3" type="submit" id="submit-btn">Finalizar venda</button>
+</form>
 </main></div></div>
+
+<style>
+@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+.search-result{cursor:pointer;}
+.search-result:hover,.search-result:focus{ background: var(--blue-tint); }
+.search-result.active{ background: var(--blue-tint); outline: 2px solid var(--blue); outline-offset:-2px; }
+</style>
+
 <script>
-let customers=[],products=[],selectedCustomer=null,items=[],method='PIX';const brl=v=>Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const cents=v=>Math.max(0,Math.round(Number(String(v).replace(/\./g,'').replace(',','.'))*100));const due=document.getElementById('due');due.value=new Date().toISOString().slice(0,10);
-Promise.all([fetch('/api/customers').then(r=>r.json()),fetch('/api/products').then(r=>r.json())]).then(([c,p])=>{customers=Array.isArray(c)?c:(c.data||[]);products=Array.isArray(p)?p:(p.data||[])});
-function renderCustomers(q=''){document.getElementById('customers').innerHTML=customers.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())).slice(0,5).map(c=>'<div class="search-result"><div><p class="search-result-name">'+c.name+'</p><p class="search-result-meta">'+(c.phone||c.email||'')+'</p></div><button type="button" class="btn-link-mercario" onclick="selectCustomer('+c.id+')">Selecionar</button></div>').join('')}
-function selectCustomer(id){selectedCustomer=customers.find(c=>c.id===id);document.getElementById('selected-customer').innerHTML='<div class="card-mercario p-2 mb-2 d-flex justify-content-between align-items-center"><span class="item-name">'+selectedCustomer.name+'</span><button type="button" class="btn-link-mercario" onclick="selectedCustomer=null;renderSelected()">Remover</button></div>';document.getElementById('customers').innerHTML=''}function renderSelected(){document.getElementById('selected-customer').innerHTML=''}
-function renderProducts(q=''){document.getElementById('products').innerHTML=products.filter(p=>p.name.toLowerCase().includes(q.toLowerCase())).slice(0,5).map(p=>'<div class="search-result"><div><p class="search-result-name">'+p.name+'</p><p class="search-result-meta">Venda '+brl(p.priceCents)+'</p></div><button type="button" class="btn-link-mercario" onclick="addProduct('+p.id+')">Adicionar</button></div>').join('')}
-function addProduct(id){const p=products.find(x=>x.id===id),i=items.find(x=>x.productId===id);if(i)i.quantity++;else items.push({productId:id,quantity:1,product:p});renderItems()};function renderItems(){itemsEl.innerHTML=items.map((i,n)=>'<div class="line-item-mercario"><div class="line-item-top"><div><p class="line-item-name">'+i.product.name+'</p><p class="line-item-meta">'+brl(i.product.priceCents)+' por unidade</p></div><button type="button" class="btn-link-mercario" onclick="items.splice('+n+',1);renderItems()">Remover</button></div><div class="line-item-bottom"><div class="stepper"><button type="button" onclick="i.quantity=Math.max(1,i.quantity-1);renderItems()">−</button><span class="stepper-value">'+i.quantity+'</span><button type="button" onclick="i.quantity++;renderItems()">+</button></div><span class="price-tag">'+brl(i.product.priceCents*i.quantity)+'</span></div></div>').join('');updateTotal()};function updateTotal(){const sub=items.reduce((n,i)=>n+i.product.priceCents*i.quantity,0),d=cents(discount.value);subtotal.textContent=brl(sub);discountView.textContent=brl(d);total.textContent=brl(Math.max(0,sub-d))}
-const itemsEl=document.getElementById('items');customerSearch.oninput=e=>renderCustomers(e.target.value);productSearch.oninput=e=>renderProducts(e.target.value);discount.oninput=updateTotal;document.querySelectorAll('.payment-option').forEach(b=>b.onclick=()=>{document.querySelectorAll('.payment-option').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');method=b.dataset.method});renderCustomers();renderProducts();
-form.onsubmit=async e=>{e.preventDefault();if(!selectedCustomer)return showError('Selecione um cliente.');if(!items.length)return showError('Adicione ao menos um produto.');const data={customerId:selectedCustomer.id,items:items.map(i=>({productId:i.productId,quantity:i.quantity})),discountCents:cents(discount.value),paymentPlan:{paymentMethod:method,installments:Number(installments.value),initialDueDate:new Date(due.value+'T00:00:00').toISOString(),modality:Number(installments.value)>1?'MONTHLY':'ONCE'},notes:notes.value||undefined};try{const r=await fetch('/api/sales',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const b=await r.json().catch(()=>({}));if(!r.ok)throw new Error(b.message||'Não foi possível criar a venda.');location.href='/sales/'+b.id}catch(err){showError(err.message)}};function showError(m){error.textContent=m;error.style.display='block'}
+// ---------- helpers ----------
+const brl = v => Number(v/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const cents = v => Math.max(0, Math.round(Number(String(v).replace(/\./g,'').replace(',','.'))*100) || 0);
+const debounce = (fn, ms) => { let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), ms); }; };
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ---------- state ----------
+let selectedCustomer = null;
+let items = [];
+let method = 'PIX';
+
+// ---------- DOM ----------
+const dueEl = document.getElementById('due');
+dueEl.value = new Date().toISOString().slice(0,10);
+
+const customerSearch = document.getElementById('customer-search');
+const customerResults = document.getElementById('customer-results');
+const customerSpinner = document.getElementById('customer-spinner');
+const selectedCustomerEl = document.getElementById('selected-customer');
+
+const productSearch = document.getElementById('product-search');
+const productResults = document.getElementById('product-results');
+const productSpinner = document.getElementById('product-spinner');
+const itemsEl = document.getElementById('items');
+const discountEl = document.getElementById('discount');
+const subtotalEl = document.getElementById('subtotal');
+const discountViewEl = document.getElementById('discount-view');
+const totalEl = document.getElementById('total');
+const errorEl = document.getElementById('error');
+const formEl = document.getElementById('form');
+const submitBtn = document.getElementById('submit-btn');
+
+// ---------- payment method ----------
+document.querySelectorAll('.payment-option').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.payment-option').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    method = b.dataset.method;
+  });
+});
+
+// ---------- customer AJAX ----------
+let custAbort = null;
+let custIndex = -1;
+
+function hideCustomerResults(){ customerResults.style.display='none'; customerResults.innerHTML=''; custIndex=-1; }
+function showCustomerResults(html){ customerResults.innerHTML=html; customerResults.style.display='block'; }
+
+function renderCustomerList(list, query){
+  if(!list.length){
+    showCustomerResults('<div class="p-3 text-center" style="font-size:11px;color:var(--text-secondary);">Nenhum cliente encontrado para "'+escHtml(query)+'"</div>');
+    return;
+  }
+  const html = list.map(c=>{
+    const meta = escHtml(c.phone || c.email || c.nickname || '');
+    return '<div class="search-result" tabindex="0" role="option" data-id="'+c.id+'" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid #f0f0f0;">'
+      + '<div style="min-width:0;"><p class="search-result-name" style="margin:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(c.name)+'</p>'
+      + (meta?'<p class="search-result-meta" style="margin:2px 0 0;color:var(--text-secondary);font-size:10px;">'+meta+'</p>':'')
+      + '</div><span class="btn-link-mercario" style="flex:0 0 auto;pointer-events:none;">Selecionar</span></div>';
+  }).join('');
+  showCustomerResults(html);
+  customerResults.querySelectorAll('.search-result').forEach(el=>{
+    el.addEventListener('click', ()=> selectCustomerById(Number(el.dataset.id)));
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); selectCustomerById(Number(el.dataset.id)); }});
+  });
+}
+
+async function fetchCustomers(query){
+  const q = query.trim();
+  if(q.length < 2){ hideCustomerResults(); return; }
+  if(custAbort) custAbort.abort();
+  custAbort = new AbortController();
+  customerSpinner.style.display='';
+  try{
+    const res = await fetch('/api/customers?search='+encodeURIComponent(q), {signal: custAbort.signal});
+    if(!res.ok) throw new Error('Falha ao buscar clientes');
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.data||[]);
+    renderCustomerList(list.slice(0,10), q);
+  }catch(err){
+    if(err.name==='AbortError') return;
+    showCustomerResults('<div class="p-2" style="color:var(--red);font-size:11px;">Erro ao buscar clientes.</div>');
+  }finally{
+    customerSpinner.style.display='none';
+  }
+}
+
+const debouncedFetchCustomers = debounce(fetchCustomers, 320);
+customerSearch.addEventListener('input', e=> debouncedFetchCustomers(e.target.value));
+customerSearch.addEventListener('keydown', e=>{
+  const opts = customerResults.querySelectorAll('.search-result');
+  if(!opts.length || customerResults.style.display==='none') return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); custIndex = Math.min(custIndex+1, opts.length-1); updateActive(opts); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); custIndex = Math.max(custIndex-1, 0); updateActive(opts); }
+  else if(e.key==='Enter'){ if(custIndex>=0){ e.preventDefault(); opts[custIndex].click(); }}
+  else if(e.key==='Escape'){ hideCustomerResults(); }
+});
+function updateActive(opts){
+  opts.forEach((o,i)=> o.classList.toggle('active', i===custIndex));
+  if(custIndex>=0) opts[custIndex].focus();
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#customer-results') && e.target!==customerSearch) hideCustomerResults();
+});
+
+// selected customer needs a cache so we can select from search results without refetching
+let lastCustomerResults = [];
+const origRenderCustomerList = renderCustomerList;
+renderCustomerList = function(list, query){
+  lastCustomerResults = list;
+  return origRenderCustomerList(list, query);
+};
+function selectCustomerById(id){
+  const c = lastCustomerResults.find(x=>x.id===id);
+  if(!c) return;
+  selectedCustomer = c;
+  selectedCustomerEl.innerHTML = '<div class="card-mercario p-2 d-flex justify-content-between align-items-center" style="border-color:var(--blue);background:var(--blue-tint);">'
+    + '<span style="display:flex;align-items:center;gap:8px;min-width:0;"><span style="width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font:700 11px Rubik,sans-serif;flex:0 0 28px;">'+escHtml(c.name.trim().charAt(0).toUpperCase())+'</span>'
+    + '<span style="min-width:0;"><span class="item-name" style="display:block;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(c.name)+'</span>'
+    + '<span style="font-size:10px;color:var(--text-secondary);">'+escHtml(c.phone||c.email||'')+'</span></span></span>'
+    + '<button type="button" class="btn-link-mercario" id="remove-customer" style="flex:0 0 auto;">Remover</button></div>';
+  document.getElementById('remove-customer').addEventListener('click', clearCustomer);
+  hideCustomerResults();
+  customerSearch.value='';
+  clearError();
+}
+function clearCustomer(){ selectedCustomer=null; selectedCustomerEl.innerHTML=''; lastCustomerResults=[]; }
+
+// ---------- product AJAX ----------
+let prodAbort = null;
+let prodIndex = -1;
+let lastProductResults = [];
+
+function hideProductResults(){ productResults.style.display='none'; productResults.innerHTML=''; prodIndex=-1; }
+function showProductResults(html){ productResults.innerHTML=html; productResults.style.display='block'; }
+
+function renderProductList(list, query){
+  lastProductResults = list;
+  if(!list.length){
+    showProductResults('<div class="p-3 text-center" style="font-size:11px;color:var(--text-secondary);">Nenhum produto encontrado para "'+escHtml(query)+'"</div>');
+    return;
+  }
+  const html = list.map(p=>{
+    return '<div class="search-result" tabindex="0" role="option" data-id="'+p.id+'" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-bottom:1px solid #f0f0f0;">'
+      + '<div style="min-width:0;"><p class="search-result-name" style="margin:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(p.name)+'</p>'
+      + '<p class="search-result-meta" style="margin:2px 0 0;color:var(--text-secondary);font-size:10px;">'+brl(p.priceCents)+'</p></div>'
+      + '<span class="btn-link-mercario" style="flex:0 0 auto;pointer-events:none;">Adicionar</span></div>';
+  }).join('');
+  showProductResults(html);
+  productResults.querySelectorAll('.search-result').forEach(el=>{
+    el.addEventListener('click', ()=> addProductById(Number(el.dataset.id)));
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); addProductById(Number(el.dataset.id)); }});
+  });
+}
+
+async function fetchProducts(query){
+  const q = query.trim();
+  if(q.length < 2){ hideProductResults(); return; }
+  if(prodAbort) prodAbort.abort();
+  prodAbort = new AbortController();
+  productSpinner.style.display='';
+  try{
+    const res = await fetch('/api/products?search='+encodeURIComponent(q), {signal: prodAbort.signal});
+    if(!res.ok) throw new Error('Falha ao buscar produtos');
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.data||[]);
+    renderProductList(list.slice(0,10), q);
+  }catch(err){
+    if(err.name==='AbortError') return;
+    showProductResults('<div class="p-2" style="color:var(--red);font-size:11px;">Erro ao buscar produtos.</div>');
+  }finally{
+    productSpinner.style.display='none';
+  }
+}
+const debouncedFetchProducts = debounce(fetchProducts, 320);
+productSearch.addEventListener('input', e=> debouncedFetchProducts(e.target.value));
+productSearch.addEventListener('keydown', e=>{
+  const opts = productResults.querySelectorAll('.search-result');
+  if(!opts.length || productResults.style.display==='none') return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); prodIndex = Math.min(prodIndex+1, opts.length-1); opts.forEach((o,i)=>o.classList.toggle('active',i===prodIndex)); if(prodIndex>=0) opts[prodIndex].focus(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); prodIndex = Math.max(prodIndex-1,0); opts.forEach((o,i)=>o.classList.toggle('active',i===prodIndex)); if(prodIndex>=0) opts[prodIndex].focus(); }
+  else if(e.key==='Enter'){ if(prodIndex>=0){ e.preventDefault(); opts[prodIndex].click(); }}
+  else if(e.key==='Escape'){ hideProductResults(); }
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#product-results') && e.target!==productSearch) hideProductResults();
+});
+
+function addProductById(id){
+  const p = lastProductResults.find(x=>x.id===id);
+  if(!p) return;
+  const existing = items.find(x=>x.productId===id);
+  if(existing) existing.quantity++;
+  else items.push({productId:id, quantity:1, product:p});
+  renderItems();
+  hideProductResults();
+  productSearch.value='';
+  productSearch.focus();
+  clearError();
+}
+
+// ---------- items ----------
+function renderItems(){
+  if(!items.length){
+    itemsEl.innerHTML = '<div class="p-3 text-center" style="font-size:11px;color:var(--text-secondary);">Nenhum produto adicionado.</div>';
+  }else{
+    itemsEl.innerHTML = items.map((it,n)=>{
+      return '<div class="line-item-mercario" style="padding:12px 14px;border-bottom:1px solid #eee;">'
+        + '<div class="line-item-top" style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start;">'
+        + '<div style="min-width:0;"><p class="line-item-name" style="margin:0;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+escHtml(it.product.name)+'</p>'
+        + '<p class="line-item-meta" style="margin:2px 0 0;color:var(--text-secondary);font-size:10px;">'+brl(it.product.priceCents)+' por unidade</p></div>'
+        + '<button type="button" class="btn-link-mercario" data-remove="'+n+'" style="flex:0 0 auto;">Remover</button></div>'
+        + '<div class="line-item-bottom" style="display:flex;align-items:center;justify-content:space-between;margin-top:9px;gap:8px;">'
+        + '<div class="stepper" style="display:flex;align-items:center;gap:8px;">'
+        + '<button type="button" data-dec="'+n+'" style="width:24px;height:24px;padding:0;border:0;border-radius:6px;background:var(--gray-100);">−</button>'
+        + '<span class="stepper-value" style="min-width:16px;text-align:center;font-weight:700;">'+it.quantity+'</span>'
+        + '<button type="button" data-inc="'+n+'" style="width:24px;height:24px;padding:0;border:0;border-radius:6px;background:var(--gray-100);">+</button></div>'
+        + '<span class="price-tag" style="font:600 12px Rubik,sans-serif;color:var(--blue);">'+brl(it.product.priceCents*it.quantity)+'</span></div></div>';
+    }).join('');
+    itemsEl.querySelectorAll('[data-remove]').forEach(b=> b.addEventListener('click', ()=>{ items.splice(Number(b.dataset.remove),1); renderItems(); }));
+    itemsEl.querySelectorAll('[data-dec]').forEach(b=> b.addEventListener('click', ()=>{ const i=items[Number(b.dataset.dec)]; i.quantity=Math.max(1,i.quantity-1); renderItems(); }));
+    itemsEl.querySelectorAll('[data-inc]').forEach(b=> b.addEventListener('click', ()=>{ items[Number(b.dataset.inc)].quantity++; renderItems(); }));
+  }
+  updateTotal();
+}
+function updateTotal(){
+  const sub = items.reduce((n,i)=> n + i.product.priceCents*i.quantity, 0);
+  const d = cents(discountEl.value);
+  subtotalEl.textContent = brl(sub);
+  discountViewEl.textContent = brl(d);
+  totalEl.textContent = brl(Math.max(0, sub - d));
+}
+discountEl.addEventListener('input', updateTotal);
+renderItems();
+
+// ---------- submit ----------
+function showError(m){ errorEl.textContent=m; errorEl.style.display='block'; errorEl.scrollIntoView({behavior:'smooth', block:'center'}); }
+function clearError(){ errorEl.textContent=''; errorEl.style.display='none'; }
+
+formEl.addEventListener('submit', async e=>{
+  e.preventDefault();
+  clearError();
+  if(!selectedCustomer) return showError('Selecione um cliente.');
+  if(!items.length) return showError('Adicione ao menos um produto.');
+  const installments = Number(document.getElementById('installments').value);
+  if(!Number.isInteger(installments) || installments < 1) return showError('Parcelas deve ser ao menos 1.');
+  if(!dueEl.value) return showError('Informe o primeiro vencimento.');
+  const data = {
+    customerId: selectedCustomer.id,
+    items: items.map(i=>({productId:i.productId, quantity:i.quantity})),
+    discountCents: cents(discountEl.value),
+    paymentPlan:{
+      paymentMethod: method,
+      installments,
+      initialDueDate: new Date(dueEl.value+'T00:00:00').toISOString(),
+      modality: installments>1 ? 'MONTHLY' : 'ONCE'
+    },
+    notes: document.getElementById('notes').value.trim() || undefined
+  };
+  submitBtn.disabled=true;
+  const origText = submitBtn.textContent;
+  submitBtn.textContent='Salvando...';
+  try{
+    const r = await fetch('/api/sales',{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+    const b = await r.json().catch(()=>({}));
+    if(!r.ok) throw new Error(b.message || 'Não foi possível criar a venda.');
+    location.href='/sales/'+b.id;
+  }catch(err){
+    showError(err.message || 'Erro inesperado.');
+    submitBtn.disabled=false;
+    submitBtn.textContent=origText;
+  }
+});
 </script></body></html>

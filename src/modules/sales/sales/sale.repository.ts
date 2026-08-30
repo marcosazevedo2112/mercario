@@ -3,6 +3,7 @@ import Sale from './entities/sale.model';
 import SaleItem from './entities/sale-item.model';
 import Installment from './entities/installment.model';
 import Settlement from './entities/settlement.model';
+import Customer from '../../customers/customer.model';
 import {SaleStatus} from './enums/sale-status';
 import {InstallmentStatus} from './enums/installment-status';
 import {PaymentMethod} from './enums/payment-method';
@@ -114,6 +115,28 @@ const SaleRepository = {
     return {rows: result.rows as SaleWithRelations[], count: result.count};
   },
 
+  findReceivables: async (params: {
+    tenantId: number;
+    from: string;
+    to: string;
+  }): Promise<Installment[]> => {
+    return Installment.findAll({
+      where: {
+        tenantId: params.tenantId,
+        status: InstallmentStatus.PENDING,
+        dueDate: {[Op.between]: [params.from, params.to]},
+      },
+      include: [
+        {
+          model: Sale,
+          as: 'sale',
+          include: [{model: Customer, as: 'customer'}],
+        },
+      ],
+      order: [['dueDate', 'ASC']],
+    });
+  },
+
   cancel: async (
     saleId: number,
     tenantId: number,
@@ -150,7 +173,7 @@ const SaleRepository = {
     tenantId: number,
     paidAt: Date,
     transaction: Transaction,
-  ): Promise<void> => {
+  ): Promise<{installment: Installment; saleCompleted: boolean}> => {
     const installment = await Installment.findOne({
       where: {
         id: installmentId,
@@ -184,11 +207,19 @@ const SaleRepository = {
       where: {saleId, tenantId, status: InstallmentStatus.PENDING},
       transaction,
     });
-    if (pending === 0)
-      await Sale.update(
+    let saleCompleted = false;
+    if (pending === 0) {
+      const [saleUpdated] = await Sale.update(
         {status: SaleStatus.COMPLETED},
         {where: {id: saleId, tenantId, status: SaleStatus.OPEN}, transaction},
       );
+      saleCompleted = saleUpdated === 1;
+    }
+    const updatedInstallment = (await Installment.findOne({
+      where: {id: installmentId, saleId, tenantId},
+      transaction,
+    })) as Installment;
+    return {installment: updatedInstallment, saleCompleted};
   },
 
   settle: async (
