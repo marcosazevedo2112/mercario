@@ -3,17 +3,17 @@
   <a href="/sales" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Vendas</a>
   <div class="d-flex align-items-start justify-content-between mt-2 flex-wrap gap-3">
     <div>
-      <h1 class="h4 fw-bold mb-1">Venda #<%= s.id %></h1>
+      <h1 class="h4 fw-bold mb-1" style="letter-spacing:var(--mc-tracking-tight)">Venda #<%= s.id %></h1>
       <div class="d-flex align-items-center gap-2 flex-wrap">
-        <% if(s.status==='OPEN'){ %><span class="badge bg-warning text-dark">Aberta</span><% } %>
+        <% if(s.status==='OPEN'){ %><span class="badge bg-warning">Aberta</span><% } %>
         <% if(s.status==='COMPLETED'){ %><span class="badge bg-success">Concluída</span><% } %>
         <% if(s.status==='CANCELED'){ %><span class="badge bg-danger">Cancelada</span><% } %>
-        <span class="small text-muted"><%= fmtDate(s.createdAt) %> · <%= s.installments %>x · <%= s.paymentMethod %> · <%= s.modality %></span>
+        <span class="small" style="color:var(--mc-text-muted)"><%= fmtDate(s.createdAt) %> · <%= s.installments %>x · <%= s.paymentMethod %> · <%= s.modality %></span>
       </div>
     </div>
     <div class="d-flex gap-2 flex-wrap">
       <% if(s.status==='OPEN'){ %>
-        <button class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#settleModal"><i class="bi bi-check2-square me-1"></i> Quitar venda</button>
+        <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#settleModal"><i class="bi bi-check2-square me-1"></i> Quitar venda</button>
         <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#cancelModal"><i class="bi bi-x-circle me-1"></i> Cancelar venda</button>
       <% } %>
     </div>
@@ -27,77 +27,77 @@
   <div class="col-lg-8">
     <!-- Cliente -->
     <div class="card mb-3">
-      <div class="card-header bg-white fw-semibold"><i class="bi bi-person me-2"></i>Cliente</div>
+      <div class="card-header"><i class="bi bi-person me-2" style="color:var(--mc-text-muted)"></i>Cliente</div>
       <div class="card-body">
         <% if(customer){ %>
-          <a href="/customers/<%= customer.id %>" class="fw-semibold text-dark text-decoration-none"><%= customer.name %></a>
-          <% if(customer.nickname){ %><span class="text-muted small"> (<%= customer.nickname %>)</span><% } %>
-          <div class="small text-muted mt-1">
+          <a href="/customers/<%= customer.id %>" class="fw-semibold text-decoration-none" style="color:var(--mc-text)"><%= customer.name %></a>
+          <% if(customer.nickname){ %><span class="small" style="color:var(--mc-text-muted)"> (<%= customer.nickname %>)</span><% } %>
+          <div class="small mt-1" style="color:var(--mc-text-muted)">
             <% if(customer.phone){ %><span class="me-3"><i class="bi bi-telephone me-1"></i><%= customer.phone %></span><% } %>
             <% if(customer.email){ %><span><i class="bi bi-envelope me-1"></i><%= customer.email %></span><% } %>
           </div>
           <% if(customer.address){ %><div class="small mt-1"><%= customer.address %></div><% } %>
         <% } else { %>
-          <span class="small text-muted">Cliente #<%= s.customerId %></span>
+          <span class="small" style="color:var(--mc-text-muted)">Cliente #<%= s.customerId %></span>
         <% } %>
       </div>
     </div>
 
     <!-- Produtos -->
     <div class="card mb-3">
-      <div class="card-header bg-white fw-semibold"><i class="bi bi-box-seam me-2"></i>Produtos</div>
+      <div class="card-header"><i class="bi bi-box-seam me-2" style="color:var(--mc-text-muted)"></i>Produtos</div>
       <div class="table-responsive">
         <table class="table table-sm align-middle mb-0">
-          <thead class="table-light"><tr><th>Produto</th><th class="text-center">Qtd</th><th class="text-end">Preço</th><th class="text-end">Subtotal</th></tr></thead>
+          <thead><tr><th>Produto</th><th class="text-center">Qtd</th><th class="text-end">Preço</th><th class="text-end">Subtotal</th></tr></thead>
           <tbody>
             <% ((s.items)||[]).forEach(function(it){ %>
               <tr>
                 <td class="small"><%= it.productName %></td>
                 <td class="text-center small"><%= it.quantity %></td>
-                <td class="text-end small"><%= fmtBRL(it.unitPriceCents) %></td>
-                <td class="text-end small fw-semibold"><%= fmtBRL(it.subtotalCents) %></td>
+                <td class="text-end small mc-money"><%= fmtBRL(it.unitPriceCents) %></td>
+                <td class="text-end small mc-money"><%= fmtBRL(it.subtotalCents) %></td>
               </tr>
             <% }) %>
           </tbody>
         </table>
       </div>
-      <div class="card-body border-top">
-        <div class="d-flex justify-content-between small"><span>Subtotal</span><span class="fw-semibold"><%= fmtBRL(s.subtotalCents) %></span></div>
-        <div class="d-flex justify-content-between small"><span>Desconto</span><span class="text-success"><%= fmtBRL(s.discountCents) %></span></div>
-        <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-2"><span>Total</span><span><%= fmtBRL(s.totalCents) %></span></div>
-        <% if(s.notes){ %><div class="small text-muted mt-3"><strong>Obs:</strong> <%= s.notes %></div><% } %>
+      <div class="card-body" style="border-top:1px solid var(--mc-border)">
+        <div class="d-flex justify-content-between small"><span style="color:var(--mc-text-muted)">Subtotal</span><span class="mc-money"><%= fmtBRL(s.subtotalCents) %></span></div>
+        <div class="d-flex justify-content-between small"><span style="color:var(--mc-text-muted)">Desconto</span><span style="color:var(--mc-success)"><%= fmtBRL(s.discountCents) %></span></div>
+        <div class="d-flex justify-content-between fw-bold pt-2 mt-2" style="border-top:1px solid var(--mc-border)"><span>Total</span><span class="mc-money mc-money-lg"><%= fmtBRL(s.totalCents) %></span></div>
+        <% if(s.notes){ %><div class="small mt-3" style="color:var(--mc-text-muted)"><strong>Obs:</strong> <%= s.notes %></div><% } %>
       </div>
     </div>
 
     <!-- Parcelas -->
     <div class="card mb-3">
-      <div class="card-header bg-white d-flex align-items-center justify-content-between">
-        <span class="fw-semibold"><i class="bi bi-calendar3 me-2"></i>Parcelas</span>
-        <span class="small text-muted"><%= installments.length %> parcela(s)</span>
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-calendar3 me-2" style="color:var(--mc-text-muted)"></i>Parcelas</span>
+        <span class="small" style="color:var(--mc-text-muted)"><%= installments.length %> parcela(s)</span>
       </div>
       <div class="card-body p-0">
         <% if(!installments || installments.length===0){ %>
-          <div class="p-4 text-center text-muted small">Nenhuma parcela.</div>
+          <div class="p-4 text-center small" style="color:var(--mc-text-muted)">Nenhuma parcela.</div>
         <% } else { %>
           <div class="d-flex flex-column">
             <% installments.forEach(function(inst){ %>
               <% const dueStr = String(inst.dueDate).slice(0,10); const isOverdue = inst.status==='PENDING' && dueStr < today; const isToday = dueStr === today; %>
-              <div class="p-3 border-bottom d-flex flex-column gap-2" id="inst-<%= inst.id %>">
+              <div class="p-3 d-flex flex-column gap-2" id="inst-<%= inst.id %>" style="border-bottom:1px solid var(--mc-border-light)">
                 <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                   <div>
                     <div class="d-flex align-items-center gap-2">
                       <span class="fw-semibold small">Parcela <%= inst.number %>/<%= s.installments %></span>
                       <% if(inst.status==='PENDING'){ %>
-                        <% if(isOverdue){ %><span class="badge bg-danger">Vencida</span><% } else if(isToday){ %><span class="badge bg-warning text-dark">Vence hoje</span><% } else { %><span class="badge bg-warning text-dark">Pendente</span><% } %>
+                        <% if(isOverdue){ %><span class="badge bg-danger">Vencida</span><% } else if(isToday){ %><span class="badge bg-warning">Vence hoje</span><% } else { %><span class="badge bg-warning">Pendente</span><% } %>
                       <% } %>
                       <% if(inst.status==='PAID'){ %><span class="badge bg-success">Pago</span><% } %>
-                      <% if(inst.status==='SETTLED'){ %><span class="badge bg-info text-dark">Quitado</span><% } %>
+                      <% if(inst.status==='SETTLED'){ %><span class="badge bg-info">Quitado</span><% } %>
                       <% if(inst.status==='CANCELED'){ %><span class="badge bg-secondary">Cancelado</span><% } %>
                     </div>
-                    <div class="small text-muted mt-1">
-                      Vencimento: <strong class="<%= isOverdue ? 'text-danger' : '' %>"><%= dueStr.split('-').reverse().join('/') %></strong>
+                    <div class="small mt-1" style="color:var(--mc-text-muted)">
+                      Vencimento: <strong class="<%= isOverdue ? '' : '' %>" style="<%= isOverdue ? 'color:var(--mc-danger)' : '' %>"><%= dueStr.split('-').reverse().join('/') %></strong>
                       <% if(inst.paidAt){ %> · Pago em <%= fmtDate(inst.paidAt) %><% } %>
-                      <span class="ms-2 fw-semibold text-dark"><%= fmtBRL(inst.amountCents) %></span>
+                      <span class="ms-2 mc-money" style="color:var(--mc-text)"><%= fmtBRL(inst.amountCents) %></span>
                     </div>
                   </div>
                   <div class="d-flex gap-2 align-items-center">
@@ -111,20 +111,19 @@
                     </button>
                   </div>
                 </div>
-                <!-- Cobranças -->
                 <div class="collapse" id="charges-<%= inst.id %>">
-                  <div class="border rounded-3 p-3 bg-light mt-2">
+                  <div class="border rounded-3 p-3 mt-2" style="background:var(--mc-surface-muted);border-color:var(--mc-border)">
                     <% const charges = (chargesByInstallment && chargesByInstallment[inst.id]) || []; %>
                     <% if(charges.length===0){ %>
-                      <p class="small text-muted mb-3">Nenhuma cobrança registrada para esta parcela.</p>
+                      <p class="small mb-3" style="color:var(--mc-text-muted)">Nenhuma cobrança registrada para esta parcela.</p>
                     <% } else { %>
                       <div class="d-flex flex-column gap-2 mb-3">
                         <% charges.forEach(function(ch){ %>
-                          <div class="bg-white border rounded-3 p-2">
+                          <div class="bg-white border rounded-3 p-2" style="border-color:var(--mc-border)">
                             <div class="d-flex align-items-center gap-2 mb-1">
-                              <span class="badge <%= ch.channel==='WHATSAPP' ? 'bg-success' : 'bg-primary' %>"><%= ch.channel==='WHATSAPP' ? 'WhatsApp' : 'E-mail' %></span>
+                              <span class="badge <%= ch.channel==='WHATSAPP' ? 'bg-success' : 'bg-info' %>"><%= ch.channel==='WHATSAPP' ? 'WhatsApp' : 'E-mail' %></span>
                               <span class="badge bg-secondary"><%= ch.triggeredBy==='AUTOMATIC' ? 'Automático' : 'Manual' %></span>
-                              <span class="small text-muted ms-auto"><%= fmtDateTime(ch.createdAt) %></span>
+                              <span class="small ms-auto" style="color:var(--mc-text-muted)"><%= fmtDateTime(ch.createdAt) %></span>
                             </div>
                             <div class="small" style="white-space:pre-wrap;word-break:break-word;"><%= ch.message %></div>
                           </div>
@@ -135,21 +134,21 @@
                       <form class="charge-form" data-sale="<%= s.id %>" data-installment="<%= inst.id %>">
                         <div class="row g-2">
                           <div class="col-6 col-md-3">
-                            <label class="form-label small fw-medium">Canal</label>
+                            <label class="form-label">Canal</label>
                             <select name="channel" class="form-select form-select-sm" required>
                               <option value="WHATSAPP">WhatsApp</option>
                               <option value="EMAIL">E-mail</option>
                             </select>
                           </div>
                           <div class="col-6 col-md-3">
-                            <label class="form-label small fw-medium">Tipo</label>
+                            <label class="form-label">Tipo</label>
                             <select name="triggeredBy" class="form-select form-select-sm">
                               <option value="MANUAL">Manual</option>
                               <option value="AUTOMATIC">Automático</option>
                             </select>
                           </div>
                           <div class="col-12">
-                            <label class="form-label small fw-medium">Mensagem</label>
+                            <label class="form-label">Mensagem</label>
                             <textarea name="message" rows="2" maxlength="5000" class="form-control form-control-sm" placeholder="Ex: Olá! Sua parcela vence em..." required></textarea>
                           </div>
                           <div class="col-12">
@@ -169,13 +168,12 @@
   </div>
 
   <div class="col-lg-4">
-    <!-- Financeiro resumo -->
     <div class="card mb-3">
-      <div class="card-header bg-white fw-semibold">Resumo financeiro</div>
+      <div class="card-header">Resumo financeiro</div>
       <div class="card-body">
-        <div class="d-flex justify-content-between small mb-1"><span>Subtotal</span><span><%= fmtBRL(s.subtotalCents) %></span></div>
-        <div class="d-flex justify-content-between small mb-1"><span>Desconto</span><span class="text-success">- <%= fmtBRL(s.discountCents) %></span></div>
-        <div class="d-flex justify-content-between fw-bold border-top pt-2"><span>Total</span><span><%= fmtBRL(s.totalCents) %></span></div>
+        <div class="d-flex justify-content-between small mb-1"><span style="color:var(--mc-text-muted)">Subtotal</span><span class="mc-money"><%= fmtBRL(s.subtotalCents) %></span></div>
+        <div class="d-flex justify-content-between small mb-1"><span style="color:var(--mc-text-muted)">Desconto</span><span style="color:var(--mc-success)">- <%= fmtBRL(s.discountCents) %></span></div>
+        <div class="d-flex justify-content-between fw-bold pt-2" style="border-top:1px solid var(--mc-border)"><span>Total</span><span class="mc-money mc-money-lg"><%= fmtBRL(s.totalCents) %></span></div>
         <hr>
         <div class="small"><strong>Método:</strong> <%= s.paymentMethod %> · <strong>Modalidade:</strong> <%= s.modality %></div>
         <div class="small"><strong>Parcelas:</strong> <%= s.installments %>x</div>
@@ -188,15 +186,15 @@
             Desconto: <%= fmtBRL(settlement.discountCents) %><br>
             Valor quitado: <%= fmtBRL(settlement.settledAmountCents) %> · <%= settlement.paymentMethod %>
             <% if(settlement.notes){ %><div class="mt-1"><%= settlement.notes %></div><% } %>
-            <div class="text-muted mt-1"><%= fmtDateTime(settlement.settledAt) %></div>
+            <div class="mt-1" style="color:var(--mc-text-muted)"><%= fmtDateTime(settlement.settledAt) %></div>
           </div>
         <% } %>
       </div>
     </div>
     <% if(s.status==='CANCELED'){ %>
-      <div class="card border-danger">
+      <div class="card" style="border-color:var(--mc-danger-border)">
         <div class="card-body">
-          <div class="fw-semibold text-danger"><i class="bi bi-x-circle me-1"></i> Venda cancelada</div>
+          <div class="fw-semibold" style="color:var(--mc-danger)"><i class="bi bi-x-circle me-1"></i> Venda cancelada</div>
           <div class="small mt-1"><%= s.cancelReason %></div>
         </div>
       </div>
@@ -208,14 +206,14 @@
 <div class="modal fade" id="payModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Confirmar pagamento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Confirmar pagamento</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
       <div class="modal-body">
         <p class="mb-2">Você está prestes a marcar esta parcela como <strong>paga</strong>:</p>
-        <div class="border rounded-3 p-3 bg-light small">
+        <div class="border rounded-3 p-3 small" style="background:var(--mc-surface-muted);border-color:var(--mc-border)">
           <div>Valor: <strong id="payAmount">—</strong></div>
           <div>Vencimento: <strong id="payDue">—</strong></div>
         </div>
-        <p class="small text-muted mt-2 mb-0">A data de pagamento será a data atual no servidor. Esta ação não pode ser desfeita.</p>
+        <p class="small mt-2 mb-0" style="color:var(--mc-text-muted)">A data de pagamento será a data atual no servidor. Esta ação não pode ser desfeita.</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -229,10 +227,10 @@
 <div class="modal fade" id="cancelModal" tabindex="-1">
   <div class="modal-dialog">
     <form action="/sales/<%= s.id %>/cancel" method="POST" class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Cancelar venda #<%= s.id %></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Cancelar venda #<%= s.id %></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
       <div class="modal-body">
-        <p class="small text-muted">Informe o motivo do cancelamento. Parcelas pendentes serão canceladas.</p>
-        <label for="cancelReason" class="form-label fw-medium">Motivo <span class="text-danger">*</span></label>
+        <p class="small" style="color:var(--mc-text-muted)">Informe o motivo do cancelamento. Parcelas pendentes serão canceladas.</p>
+        <label for="cancelReason" class="form-label">Motivo <span style="color:var(--mc-danger)">*</span></label>
         <textarea id="cancelReason" name="reason" rows="3" maxlength="500" class="form-control" placeholder="Descreva o motivo" required></textarea>
         <div class="form-text">Máx. 500 caracteres</div>
       </div>
@@ -248,15 +246,15 @@
 <div class="modal fade" id="settleModal" tabindex="-1">
   <div class="modal-dialog">
     <form action="/sales/<%= s.id %>/settle" method="POST" class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Quitar venda #<%= s.id %></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Quitar venda #<%= s.id %></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
       <div class="modal-body">
         <div class="mb-3">
-          <label for="settleDiscount" class="form-label fw-medium">Desconto (R$)</label>
+          <label for="settleDiscount" class="form-label">Desconto (R$)</label>
           <input type="text" id="settleDiscount" name="discount" value="0,00" class="form-control" placeholder="0,00">
           <div class="form-text">Desconto aplicado sobre o saldo pendente</div>
         </div>
         <div class="mb-3">
-          <label for="settleMethod" class="form-label fw-medium">Método de pagamento <span class="text-danger">*</span></label>
+          <label for="settleMethod" class="form-label">Método de pagamento <span style="color:var(--mc-danger)">*</span></label>
           <select id="settleMethod" name="paymentMethod" class="form-select" required>
             <option value="PIX">PIX</option>
             <option value="BOLETO">Boleto</option>
@@ -266,7 +264,7 @@
           </select>
         </div>
         <div class="mb-3">
-          <label for="settleNotes" class="form-label fw-medium">Observação</label>
+          <label for="settleNotes" class="form-label">Observação</label>
           <textarea id="settleNotes" name="notes" rows="2" maxlength="500" class="form-control" placeholder="Opcional"></textarea>
         </div>
       </div>

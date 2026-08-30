@@ -1,35 +1,41 @@
 <div class="mb-4">
   <a href="<%= isEdit ? '/customers/' + customer.id : '/customers' %>" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
-  <h1 class="h4 fw-bold mt-2 mb-1"><%= isEdit ? 'Editar cliente' : 'Novo cliente' %></h1>
-  <p class="text-muted small mb-0"><%= isEdit ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente' %></p>
+  <h1 class="h4 fw-bold mt-2 mb-1" style="letter-spacing:var(--mc-tracking-tight)"><%= isEdit ? 'Editar cliente' : 'Novo cliente' %></h1>
+  <p class="small mb-0" style="color:var(--mc-text-muted)"><%= isEdit ? 'Atualize os dados do cliente' : 'Cadastre um novo cliente' %></p>
 </div>
 
 <div class="card">
   <div class="card-body p-4">
     <form action="<%= isEdit ? '/customers/' + customer.id + '/edit' : '/customers' %>" method="POST" data-prevent-double novalidate>
+      <div class="small fw-semibold mb-3" style="color:var(--mc-text-muted);letter-spacing:0.06em;text-transform:uppercase;font-size:0.72rem">Informações do cliente</div>
       <div class="row g-3">
         <div class="col-md-8">
-          <label for="name" class="form-label fw-medium">Nome <span class="text-danger">*</span></label>
+          <label for="name" class="form-label">Nome <span style="color:var(--mc-danger)">*</span></label>
           <input type="text" class="form-control" id="name" name="name" value="<%= isEdit ? customer.name : (typeof formData!=='undefined'&&formData?formData.name:'') %>" required maxlength="150" placeholder="Nome completo">
         </div>
         <div class="col-md-4">
-          <label for="nickname" class="form-label fw-medium">Apelido</label>
+          <label for="nickname" class="form-label">Apelido</label>
           <input type="text" class="form-control" id="nickname" name="nickname" value="<%= isEdit ? (customer.nickname||'') : (typeof formData!=='undefined'&&formData?formData.nickname:'') %>" maxlength="150" placeholder="Como chama">
         </div>
+      </div>
+
+      <hr class="my-4">
+      <div class="small fw-semibold mb-3" style="color:var(--mc-text-muted);letter-spacing:0.06em;text-transform:uppercase;font-size:0.72rem">Contato</div>
+      <div class="row g-3">
         <div class="col-md-6">
-          <label for="phone" class="form-label fw-medium">Telefone</label>
+          <label for="phone" class="form-label">Telefone</label>
           <input type="tel" class="form-control" id="phone" name="phone" value="<%= isEdit ? (customer.phone||'') : (typeof formData!=='undefined'&&formData?formData.phone:'') %>" maxlength="30" placeholder="(11) 99999-9999">
         </div>
         <div class="col-md-6">
-          <label for="email" class="form-label fw-medium">E-mail</label>
+          <label for="email" class="form-label">E-mail</label>
           <input type="email" class="form-control" id="email" name="email" value="<%= isEdit ? (customer.email||'') : (typeof formData!=='undefined'&&formData?formData.email:'') %>" maxlength="180" placeholder="cliente@email.com">
         </div>
         <div class="col-12">
-          <label for="address" class="form-label fw-medium">Endereço</label>
+          <label for="address" class="form-label">Endereço</label>
           <input type="text" class="form-control" id="address" name="address" value="<%= isEdit ? (customer.address||'') : (typeof formData!=='undefined'&&formData?formData.address:'') %>" maxlength="500" placeholder="Rua, número, bairro, cidade">
         </div>
         <div class="col-12">
-          <label for="notes" class="form-label fw-medium">Observações</label>
+          <label for="notes" class="form-label">Observações</label>
           <textarea class="form-control" id="notes" name="notes" rows="3" maxlength="1000" placeholder="Anotações sobre o cliente"><%= isEdit ? (customer.notes||'') : (typeof formData!=='undefined'&&formData?formData.notes:'') %></textarea>
         </div>
       </div>

@@ -2,8 +2,8 @@
   <a href="/customers" class="small text-decoration-none"><i class="bi bi-arrow-left me-1"></i> Clientes</a>
   <div class="d-flex align-items-start justify-content-between mt-2 flex-wrap gap-3">
     <div>
-      <h1 class="h4 fw-bold mb-1"><%= customer.name %></h1>
-      <% if(customer.nickname){ %><p class="text-muted small mb-1"><%= customer.nickname %></p><% } %>
+      <h1 class="h4 fw-bold mb-1" style="letter-spacing:var(--mc-tracking-tight)"><%= customer.name %></h1>
+      <% if(customer.nickname){ %><p class="small mb-1" style="color:var(--mc-text-muted)"><%= customer.nickname %></p><% } %>
       <span class="badge <%= customer.active ? 'bg-success' : 'bg-secondary' %>"><%= customer.active ? 'Ativo' : 'Inativo' %></span>
     </div>
     <div class="d-flex gap-2">
@@ -16,23 +16,23 @@
 <div class="row g-4">
   <div class="col-lg-8">
     <div class="card">
-      <div class="card-header bg-white fw-semibold">Informações</div>
+      <div class="card-header">Informações</div>
       <div class="card-body">
         <div class="row g-3">
           <% if(customer.phone){ %>
-            <div class="col-md-6"><div class="small text-muted">Telefone</div><div class="fw-medium"><i class="bi bi-telephone me-1"></i><%= customer.phone %></div></div>
+            <div class="col-md-6"><div class="small" style="color:var(--mc-text-muted)">Telefone</div><div class="fw-medium"><i class="bi bi-telephone me-1" style="color:var(--mc-text-muted)"></i><%= customer.phone %></div></div>
           <% } %>
           <% if(customer.email){ %>
-            <div class="col-md-6"><div class="small text-muted">E-mail</div><div class="fw-medium"><%= customer.email %></div></div>
+            <div class="col-md-6"><div class="small" style="color:var(--mc-text-muted)">E-mail</div><div class="fw-medium"><%= customer.email %></div></div>
           <% } %>
           <% if(customer.address){ %>
-            <div class="col-12"><div class="small text-muted">Endereço</div><div><%= customer.address %></div></div>
+            <div class="col-12"><div class="small" style="color:var(--mc-text-muted)">Endereço</div><div><%= customer.address %></div></div>
           <% } %>
           <% if(customer.notes){ %>
-            <div class="col-12"><div class="small text-muted">Observações</div><div class="border rounded-3 p-3 bg-light"><%= customer.notes %></div></div>
+            <div class="col-12"><div class="small" style="color:var(--mc-text-muted)">Observações</div><div class="border rounded-3 p-3" style="background:var(--mc-surface-muted);border-color:var(--mc-border)"><%= customer.notes %></div></div>
           <% } %>
           <% if(!customer.phone && !customer.email && !customer.address && !customer.notes){ %>
-            <div class="col-12 text-muted small">Nenhuma informação adicional cadastrada.</div>
+            <div class="col-12 small" style="color:var(--mc-text-muted)">Nenhuma informação adicional cadastrada.</div>
           <% } %>
         </div>
       </div>
@@ -54,7 +54,7 @@
 <div class="modal fade" id="deleteModal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header"><h5 class="modal-title">Excluir cliente?</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-header"><h5 class="modal-title">Excluir cliente?</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
       <div class="modal-body"><p class="mb-0">O cliente <strong><%= customer.name %></strong> será desativado e não aparecerá mais nas listas. Vendas já registradas não serão afetadas.</p></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>

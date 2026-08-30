@@ -1,16 +1,18 @@
 <% const _err = typeof error !== 'undefined' ? error : null; %>
-<div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-  <div>
-    <h1 class="h4 fw-bold mb-1">Parcelas</h1>
-    <p class="text-muted small mb-0">Acompanhe seus recebimentos por data.</p>
-  </div>
-  <div class="d-flex align-items-center gap-2 flex-wrap">
-    <button id="inst-today" class="btn btn-dark btn-sm"><i class="bi bi-crosshair me-1"></i> Hoje</button>
-    <div class="btn-group btn-group-sm" role="group" aria-label="Navegação">
-      <button id="inst-prev" class="btn btn-outline-secondary" aria-label="Período anterior"><i class="bi bi-chevron-left"></i></button>
-      <button id="inst-next" class="btn btn-outline-secondary" aria-label="Próximo período"><i class="bi bi-chevron-right"></i></button>
+<div class="mc-page-header">
+  <div class="mc-page-title-row">
+    <div>
+      <h1>Parcelas</h1>
+      <p>Acompanhe seus recebimentos por data</p>
     </div>
-    <span id="inst-period-label" class="fw-semibold small ms-1"></span>
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+      <button id="inst-today" class="btn btn-dark btn-sm"><i class="bi bi-crosshair me-1"></i> Hoje</button>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Navegação">
+        <button id="inst-prev" class="btn btn-outline-secondary" aria-label="Período anterior"><i class="bi bi-chevron-left"></i></button>
+        <button id="inst-next" class="btn btn-outline-secondary" aria-label="Próximo período"><i class="bi bi-chevron-right"></i></button>
+      </div>
+      <span id="inst-period-label" class="fw-semibold small ms-1" style="color:var(--mc-text)"></span>
+    </div>
   </div>
 </div>
 
@@ -21,22 +23,21 @@
   </div>
 <% } %>
 
-<!-- Legenda + resumo -->
 <div class="row g-3 mb-3">
   <div class="col-lg-8">
     <div class="card">
       <div class="card-body py-3">
         <div class="d-flex flex-wrap align-items-center gap-3 small">
-          <span class="fw-semibold text-muted">Tipos de pagamento</span>
+          <span class="fw-semibold" style="color:var(--mc-text-muted)">Tipos de pagamento</span>
           <span class="d-inline-flex align-items-center gap-1"><span class="legend-dot" style="background:var(--pm-pix)"></span> PIX</span>
           <span class="d-inline-flex align-items-center gap-1"><span class="legend-dot" style="background:var(--pm-boleto)"></span> Boleto</span>
           <span class="d-inline-flex align-items-center gap-1"><span class="legend-dot" style="background:var(--pm-credit)"></span> Cartão de crédito</span>
           <span class="d-inline-flex align-items-center gap-1"><span class="legend-dot" style="background:var(--pm-debit)"></span> Cartão de débito</span>
           <span class="d-inline-flex align-items-center gap-1"><span class="legend-dot" style="background:var(--pm-cash)"></span> Dinheiro</span>
-          <span class="ms-auto d-inline-flex align-items-center gap-2 text-muted">
-            <span><i class="bi bi-check-circle-fill text-success"></i> Pago</span>
-            <span><i class="bi bi-circle-fill" style="font-size:7px;vertical-align:middle"></i> Pendente</span>
-            <span><i class="bi bi-exclamation-triangle-fill text-danger"></i> Vencido</span>
+          <span class="ms-auto d-inline-flex align-items-center gap-2" style="color:var(--mc-text-muted)">
+            <span><i class="bi bi-check-circle-fill" style="color:var(--mc-success)"></i> Pago</span>
+            <span><i class="bi bi-circle-fill" style="font-size:7px;vertical-align:middle;color:var(--mc-warning)"></i> Pendente</span>
+            <span><i class="bi bi-exclamation-triangle-fill" style="color:var(--mc-danger)"></i> Vencido</span>
           </span>
         </div>
       </div>
@@ -46,65 +47,62 @@
     <div class="card">
       <div class="card-body py-3">
         <div class="d-flex justify-content-between small">
-          <span class="text-muted">Período</span><strong id="inst-summary-count">—</strong>
+          <span style="color:var(--mc-text-muted)">Período</span><strong id="inst-summary-count">—</strong>
         </div>
         <div class="d-flex justify-content-between small">
-          <span class="text-muted">A receber</span><strong id="inst-summary-pending">—</strong>
+          <span style="color:var(--mc-text-muted)">A receber</span><strong id="inst-summary-pending">—</strong>
         </div>
         <div class="d-flex justify-content-between small">
-          <span class="text-muted">Recebido</span><strong id="inst-summary-paid" class="text-success">—</strong>
+          <span style="color:var(--mc-text-muted)">Recebido</span><strong id="inst-summary-paid" style="color:var(--mc-success)">—</strong>
         </div>
         <div class="d-flex justify-content-between small">
-          <span class="text-muted">Vencido</span><strong id="inst-summary-overdue" class="text-danger">—</strong>
+          <span style="color:var(--mc-text-muted)">Vencido</span><strong id="inst-summary-overdue" style="color:var(--mc-danger)">—</strong>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<div id="inst-loading" class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div> Carregando parcelas…</div>
+<div id="inst-loading" class="text-center py-5" style="color:var(--mc-text-muted)"><div class="spinner-border spinner-border-sm me-2"></div> Carregando parcelas…</div>
 <div id="inst-empty" class="empty-state d-none">
-  <div class="icon"><i class="bi bi-calendar-x text-muted"></i></div>
+  <div class="icon"><i class="bi bi-calendar-x"></i></div>
   <p class="fw-medium mb-1">Nenhuma parcela neste período</p>
-  <p class="small text-muted mb-3">Não existem recebimentos programados para estas datas.</p>
+  <p class="small mb-3" style="color:var(--mc-text-muted)">Não existem recebimentos programados para estas datas.</p>
   <a href="/sales/new" class="btn btn-sm btn-dark">Nova venda</a>
 </div>
 <div id="inst-error" class="alert alert-danger d-none">Não foi possível carregar as parcelas. <button id="inst-retry" class="btn btn-sm btn-outline-danger ms-2">Tentar novamente</button></div>
 
 <div id="inst-calendar" class="calendar-grid d-none"></div>
 
-<!-- Filtros client-side -->
-<div class="card mt-3">
-  <div class="card-body py-3">
-    <div class="row g-2 align-items-end">
-      <div class="col-6 col-md-3">
-        <label class="form-label small mb-1">Pagamento</label>
-        <select id="filter-method" class="form-select form-select-sm">
-          <option value="">Todos</option>
-          <option value="PIX">PIX</option>
-          <option value="BOLETO">Boleto</option>
-          <option value="CREDIT_CARD">Cartão de crédito</option>
-          <option value="DEBIT_CARD">Cartão de débito</option>
-          <option value="CASH">Dinheiro</option>
-        </select>
-      </div>
-      <div class="col-6 col-md-3">
-        <label class="form-label small mb-1">Status</label>
-        <select id="filter-status" class="form-select form-select-sm">
-          <option value="">Todos</option>
-          <option value="PENDING">Pendente</option>
-          <option value="PAID">Pago</option>
-          <option value="SETTLED">Quitado</option>
-          <option value="CANCELED">Cancelado</option>
-        </select>
-      </div>
-      <div class="col-12 col-md-4">
-        <label class="form-label small mb-1">Cliente</label>
-        <input id="filter-customer" class="form-control form-control-sm" placeholder="Filtrar por nome">
-      </div>
-      <div class="col-12 col-md-2 d-grid">
-        <button id="filter-clear" class="btn btn-outline-secondary btn-sm">Limpar</button>
-      </div>
+<div class="mc-filters mt-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-6 col-md-3">
+      <label class="form-label">Pagamento</label>
+      <select id="filter-method" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <option value="PIX">PIX</option>
+        <option value="BOLETO">Boleto</option>
+        <option value="CREDIT_CARD">Cartão de crédito</option>
+        <option value="DEBIT_CARD">Cartão de débito</option>
+        <option value="CASH">Dinheiro</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-3">
+      <label class="form-label">Status</label>
+      <select id="filter-status" class="form-select form-select-sm">
+        <option value="">Todos</option>
+        <option value="PENDING">Pendente</option>
+        <option value="PAID">Pago</option>
+        <option value="SETTLED">Quitado</option>
+        <option value="CANCELED">Cancelado</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4">
+      <label class="form-label">Cliente</label>
+      <input id="filter-customer" class="form-control form-control-sm" placeholder="Filtrar por nome">
+    </div>
+    <div class="col-12 col-md-2 d-grid">
+      <button id="filter-clear" class="btn btn-outline-secondary btn-sm">Limpar</button>
     </div>
   </div>
 </div>

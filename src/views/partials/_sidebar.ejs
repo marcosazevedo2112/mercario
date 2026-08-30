@@ -1,20 +1,20 @@
 <% const path = typeof currentPath !== 'undefined' ? currentPath : ''; %>
-<nav class="sidebar bg-white border-end position-fixed top-0 start-0 d-none d-lg-flex flex-column p-3">
+<nav class="sidebar position-fixed top-0 start-0 d-none d-lg-flex flex-column p-3" aria-label="Navegação principal">
   <a href="/" class="d-flex align-items-center gap-2 text-decoration-none mb-4">
-    <span class="bg-dark text-white rounded-3 d-inline-flex align-items-center justify-content-center" style="width:36px;height:36px;"><i class="bi bi-shop"></i></span>
-    <strong class="fs-5 text-dark">Mercario</strong>
+    <span class="sidebar-brand" aria-hidden="true"><i class="bi bi-shop"></i></span>
+    <strong class="fs-5" style="color:var(--mc-text);letter-spacing:var(--mc-tracking-tight)">Mercario</strong>
   </a>
-  <ul class="nav flex-column gap-1">
-    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path === '/' || path.startsWith('/dashboard') ? 'active' : '' %>" href="/"><i class="bi bi-grid"></i> Visão geral</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/sales') ? 'active' : '' %>" href="/sales"><i class="bi bi-receipt"></i> Vendas</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/installments') ? 'active' : '' %>" href="/installments"><i class="bi bi-calendar-week"></i> Parcelas</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/customers') ? 'active' : '' %>" href="/customers"><i class="bi bi-people"></i> Clientes</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center gap-2 <%= path.startsWith('/products') ? 'active' : '' %>" href="/products"><i class="bi bi-box-seam"></i> Produtos</a></li>
+  <ul class="nav flex-column gap-1" role="list">
+    <li class="nav-item"><a class="nav-link <%= path === '/' || path.startsWith('/dashboard') ? 'active' : '' %>" href="/"><i class="bi bi-grid"></i> Visão geral</a></li>
+    <li class="nav-item"><a class="nav-link <%= path.startsWith('/sales') ? 'active' : '' %>" href="/sales"><i class="bi bi-receipt"></i> Vendas</a></li>
+    <li class="nav-item"><a class="nav-link <%= path.startsWith('/installments') ? 'active' : '' %>" href="/installments"><i class="bi bi-calendar-week"></i> Parcelas</a></li>
+    <li class="nav-item"><a class="nav-link <%= path.startsWith('/customers') ? 'active' : '' %>" href="/customers"><i class="bi bi-people"></i> Clientes</a></li>
+    <li class="nav-item"><a class="nav-link <%= path.startsWith('/products') ? 'active' : '' %>" href="/products"><i class="bi bi-box-seam"></i> Produtos</a></li>
   </ul>
-  <div class="mt-auto pt-3 border-top">
+  <div class="mt-auto pt-3" style="border-top:1px solid var(--mc-border)">
     <% if (typeof user !== 'undefined' && user) { %>
-      <div class="small text-muted mb-2 text-truncate"><%= user.email %></div>
-      <form action="/auth/logout" method="POST"><button class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-box-arrow-right"></i> Sair</button></form>
+      <div class="sidebar-user-email mb-2" title="<%= user.email %>"><%= user.email %></div>
+      <form action="/auth/logout" method="POST"><button class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-box-arrow-right me-1"></i> Sair</button></form>
     <% } %>
   </div>
 </nav>
